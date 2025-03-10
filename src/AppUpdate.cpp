@@ -62,6 +62,10 @@ std::shared_ptr<Balloon> factory(int num, std::vector<glm::vec2> coordinates) {
 
 void App::Update() {
     LOG_TRACE("Update");
+    
+
+
+
     if (Util::Input::IsKeyPressed(Util::Keycode::MOUSE_LB) && m_Phase != Phase::LOBBY){
         glm::vec2 position = Util::Input::GetCursorPosition ();
         LOG_DEBUG("Mouse position: " + std::to_string(position.x) + ", " + std::to_string(position.y));
@@ -78,16 +82,52 @@ void App::Update() {
     if (m_DragMonkey) {
         // 已经有猴子在拖拽中
         if (Util::Input::IsKeyPressed(Util::Keycode::MOUSE_LB)) { //is move to outside will have bug
-
             // 鼠标按下，更新猴子位置
             m_DragMonkey->SetPosition(mousePosition);
             m_DragMonkey->UpdateRange();
+            m_DragMonkey->SetRangeColor(true);
+            if (m_DragMonkey->Placeable(Level_Placeable)) {
+                for (auto& monkeyPtr : m_Monkeys) {
+                    if (monkeyPtr->Touched(*m_DragMonkey)) {
+                        m_DragMonkey->SetRangeColor(false);
+                        break;
+                    }
+                }
+            }else{
+                m_DragMonkey->SetRangeColor(false);
+            }
         } else {
+            bool allMonkeysAllowPlacement = true;
             
-            m_Monkeys.push_back(m_DragMonkey);
-            m_DragMonkey->SetPosition(mousePosition);
-            m_DragMonkey->UpdateRange();
-            // 清除拖拽引用
+            // 检查所有现有猴子是否允许在此位置放置
+            if (m_DragMonkey->Placeable(Level_Placeable)) {
+                for (auto& monkeyPtr : m_Monkeys) {
+                    if (monkeyPtr->Touched(*m_DragMonkey)) { 
+                        allMonkeysAllowPlacement = false;
+                        break;
+                    }
+                }
+            }else{
+                allMonkeysAllowPlacement = false;
+            }
+            
+            // 只有当所有条件都满足时才放置猴子
+            if (allMonkeysAllowPlacement) {
+                // 添加到猴子集合
+                m_Monkeys.push_back(m_DragMonkey);
+                
+                // 设置位置并更新范围
+                m_DragMonkey->SetPosition(mousePosition);
+                m_DragMonkey->UpdateRange();
+                m_DragMonkey->SetRangeColor(true);                
+                // 确保将猴子添加到场景根节点
+                m_Root.AddChild(m_DragMonkey);
+            }else{
+                m_Root.RemoveChild(m_DragMonkey);
+                m_Root.RemoveChild(m_DragMonkey->GetRange());
+            }
+            
+            // 无论是否成功放置，都清除拖拽引用
             m_DragMonkey = nullptr;
         }
     } else {
@@ -107,28 +147,7 @@ void App::Update() {
                 }
             }
         }
-    }
-
-    if (Util::Input::IsKeyPressed(Util::Keycode::MOUSE_LB) && m_Phase != Phase::LOBBY && false){
-        glm::vec2 position = Util::Input::GetCursorPosition ();
-        std::shared_ptr<Monkey> monkey = std::make_shared<DartMonkey>(position);
-        m_Monkeys.push_back(monkey);
-        m_Root.AddChild(monkey);
-        m_Root.AddChild(monkey -> GetRange());
-        // std::shared_ptr<Attack> m_Attack;
-        // LOG_DEBUG(position);
-        // if (cd <= 20) {
-        //     cd = 20;
-        //     if (!m_Balloons.empty()) {
-        //         m_Attack = std::make_shared<Dart>(position, m_Balloons[0] ->GetPosition());
-        //         m_Attacks.push_back(m_Attack);
-        //         m_Root.AddChild(m_Attack);
-        //     }
-        //     else {
-        //         cd  = 0;
-        //     }
-        // }
-    }
+    } 
     // cd -= 1;
     if (Util::Input::IsKeyPressed(Util::Keycode::MOUSE_LB) && m_Phase == Phase::LOBBY){
         glm::vec2 position = Util::Input::GetCursorPosition ();
@@ -136,17 +155,6 @@ void App::Update() {
             ValidTask();
         }
     }
-    // ######################################################################################
-
-    // for (auto& balloonPtr : m_Balloons) {
-    //     for (auto& balloonPtr2 : m_Balloons) {
-    //         if (balloonPtr != balloonPtr2 && balloonPtr -> IsCollision(balloonPtr2)) {
-    //             LOG_DEBUG("Test");
-    //         }
-    //     }
-    // }
-
-    // ######################################################################################
 
     if (m_Phase != Phase::LOBBY && count == 0) {
         int round = m_Counters[2] -> GetCurrent()-1;

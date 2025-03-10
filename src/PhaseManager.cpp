@@ -20,3 +20,8 @@ std::vector<glm::vec2> PhaseResourceManger::GetCoordinates(int level) const {
 std::vector<std::vector<int>> PhaseResourceManger::GetBalloons(int level) const {
     return balloons[level];
 }
+
+std::vector<std::vector<std::vector<glm::vec2>>> PhaseResourceManger::GetPlaceable(int level) const {
+    return nonplaceinfo[level];
+}
+

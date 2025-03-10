@@ -56,6 +56,7 @@ void App::Reset() {
 void App::SetLevel(int level) {
     Level_Coordinates = m_PRM -> GetCoordinates(level-1);
     Level_Balloons = m_PRM -> GetBalloons(level-1);
+    Level_Placeable = m_PRM -> GetPlaceable(level-1);
 
     m_Counters.push_back(std::make_shared<Heart>(20, 20));
     m_Root.AddChild(m_Counters[0]);
@@ -107,4 +108,12 @@ void App::SetLevel(int level) {
     auto m_AirportButton = std::make_shared<AirportButton>(glm::vec2(startX+buttonXSpacing, startY));
     m_DragButtons.push_back(m_AirportButton);
     m_Root.AddChild(m_AirportButton);
+
+    auto m_BuccaneerMonkeyButton = std::make_shared<BuccaneerMonkeyButton>(glm::vec2(startX+buttonXSpacing, startY-buttonYSpacing));
+    m_DragButtons.push_back(m_BuccaneerMonkeyButton);
+    m_Root.AddChild(m_BuccaneerMonkeyButton);
+
+    auto m_SuperMonkeyButton = std::make_shared<SuperMonkeyButton>(glm::vec2(startX+buttonXSpacing, startY-buttonYSpacing*2));
+    m_DragButtons.push_back(m_SuperMonkeyButton);
+    m_Root.AddChild(m_SuperMonkeyButton);
 }

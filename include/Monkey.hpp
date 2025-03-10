@@ -24,6 +24,10 @@ public:
       bool IsInside(glm::vec2 mousePosition);
       void CheckRangeVisible();
       void SetSize(glm::vec2 size);
+      void SetRangeColor(bool is_placeable);
+      bool Touched(Monkey& other);
+      bool IsMonkeyInRectangle(glm::vec2 topLeft, glm::vec2 bottomRight);
+      bool Placeable(std::vector<std::vector<std::vector<glm::vec2>>> Level_Placeable);
 
       [[nodiscard]] virtual std::vector<std::shared_ptr<Attack>> ProduceAttack(glm::vec2 goalPosition);
       [[nodiscard]] glm::vec2 GetPosition() const { return m_Transform.translation; }
@@ -89,4 +93,16 @@ public:
 private:
       int airplane_num = 1;
       std::vector<std::shared_ptr<Attack>> m_Airplanes;
+};
+
+class BuccaneerMonkey : public Monkey {
+public:
+      explicit BuccaneerMonkey(glm::vec2 position);
+      [[nodiscard]] std::vector<std::shared_ptr<Attack>> ProduceAttack(glm::vec2 goalPosition) override;
+};
+
+class SuperMonkey : public Monkey {
+public:
+      explicit SuperMonkey(glm::vec2 position);
+      [[nodiscard]] std::vector<std::shared_ptr<Attack>> ProduceAttack(glm::vec2 goalPosition) override;
 };

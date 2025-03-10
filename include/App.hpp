@@ -46,6 +46,7 @@ private:
     Phase m_Phase = Phase::LOBBY;
     std::vector<glm::vec2> Level_Coordinates;
     std::vector<std::vector<int>> Level_Balloons;
+    std::vector<std::vector<std::vector<glm::vec2>>> Level_Placeable;
     Util::Renderer m_Root;
     std::vector<std::shared_ptr<Counter>> m_Counters;
     std::vector<std::shared_ptr<Balloon>> m_Balloons;
@@ -55,6 +56,7 @@ private:
     std::vector<std::shared_ptr<DragButton>> m_DragButtons;
     std::shared_ptr<Monkey> m_DragMonkey;
     std::shared_ptr<Monkey> m_testMonkey;
+    
 
     bool m_EnterDown = false;
 };
