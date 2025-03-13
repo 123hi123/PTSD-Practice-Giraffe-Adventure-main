@@ -51,6 +51,13 @@ void App::Reset() {
         }
         m_Monkeys = {};
     }
+
+    if (!m_Attacks.empty()) {
+        for (auto& attackPtr : m_Attacks) {
+            m_Root.RemoveChild(attackPtr);
+        }
+        m_Attacks = {};
+    }
 }
 
 void App::SetLevel(int level) {
@@ -62,7 +69,7 @@ void App::SetLevel(int level) {
     m_Root.AddChild(m_Counters[0]);
     m_Root.AddChild(m_Counters[0]->GetCounterText());
 
-    m_Counters.push_back(std::make_shared<Money>(0,99999));
+    m_Counters.push_back(std::make_shared<Money>(99999,99999));
     m_Root.AddChild(m_Counters[1]);
     m_Root.AddChild(m_Counters[1]->GetCounterText());
 
@@ -116,4 +123,16 @@ void App::SetLevel(int level) {
     auto m_SuperMonkeyButton = std::make_shared<SuperMonkeyButton>(glm::vec2(startX+buttonXSpacing, startY-buttonYSpacing*2));
     m_DragButtons.push_back(m_SuperMonkeyButton);
     m_Root.AddChild(m_SuperMonkeyButton);
+
+    auto m_IceMonkeyButton = std::make_shared<IceMonkeyButton>(glm::vec2(startX+buttonXSpacing, startY-buttonYSpacing*3));
+    m_DragButtons.push_back(m_IceMonkeyButton);
+    m_Root.AddChild(m_IceMonkeyButton);
+
+    auto m_RubberMonkeyButton = std::make_shared<RubberMonkeyButton>(glm::vec2(startX+buttonXSpacing, startY-buttonYSpacing*4));
+    m_DragButtons.push_back(m_RubberMonkeyButton);
+    m_Root.AddChild(m_RubberMonkeyButton);
+
+    auto m_MagicMonkeyButton = std::make_shared<MagicMonkeyButton>(glm::vec2(startX+buttonXSpacing, startY-buttonYSpacing*5));
+    m_DragButtons.push_back(m_MagicMonkeyButton);
+    m_Root.AddChild(m_MagicMonkeyButton);
 }
