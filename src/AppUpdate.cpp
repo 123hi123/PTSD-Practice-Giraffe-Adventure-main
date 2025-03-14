@@ -85,9 +85,7 @@ void App::Update() {
             m_DragMonkey->SetPosition(mousePosition);
             m_DragMonkey->UpdateRange();
             m_DragMonkey->SetRangeColor(true);
-            LOG_DEBUG("========1猴子位置: {}, {}", m_DragMonkey->GetPosition().x, m_DragMonkey->GetPosition().y);
             if (m_DragMonkey->Placeable(Level_Placeable)) {
-                // 查看所有已經放置的猴子 看看有沒有碰到
                 for (auto& monkeyPtr : m_Monkeys) {
                     if (monkeyPtr->Touched(*m_DragMonkey)) {
                         m_DragMonkey->SetRangeColor(false);
@@ -259,6 +257,11 @@ void App::Update() {
 
     remove_attacks = {};
     // #################################################################################################
+    if (m_ClickedMonkey) {
+        glm::vec2 position = Util::Input::GetCursorPosition ();
+        m_ClickedMonkey -> IsButtonTouch(position);
+    }
+
     if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB)) {
         glm::vec2 position = Util::Input::GetCursorPosition ();
         int clickInformationBoard = 0; //0:無, 1:有, 2:關閉, 3:賣掉, 其他:升級(多少錢回多少
@@ -276,7 +279,7 @@ void App::Update() {
                 for (auto& objectPtr : InfortionBoardObject) {
                     m_Root.RemoveChild(objectPtr);
                 }
-                m_Counters[1] -> AddValue(m_ClickedMonkey -> GetCost());
+                m_Counters[1] -> AddValue(m_ClickedMonkey -> GetValue());
                 m_ClickedMonkey = nullptr;
             }
             else if (clickInformationBoard != 0 && clickInformationBoard != 1) {
@@ -293,6 +296,7 @@ void App::Update() {
             }
         }
     }
+
     for (auto& monkeyPtr : m_Monkeys) {
         if (monkeyPtr -> Countdown()) {
             for (auto& balloonPtr : m_Balloons) {

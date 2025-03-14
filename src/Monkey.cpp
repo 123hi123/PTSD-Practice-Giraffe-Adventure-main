@@ -34,14 +34,14 @@ bool Monkey::IsInside(glm::vec2 mousePosition){
     // 计算猴子的边界范围
     float leftBound = m_Transform.translation.x - m_Size.x / 2.0f;
     float rightBound = m_Transform.translation.x + m_Size.x / 2.0f;
-    float topBound = m_Transform.translation.y - m_Size.y / 2.0f;
-    float bottomBound = m_Transform.translation.y + m_Size.y / 2.0f;
+    float topBound = m_Transform.translation.y + m_Size.y / 2.0f;
+    float bottomBound = m_Transform.translation.y - m_Size.y / 2.0f;
     
     // 判断鼠标点击位置是否在猴子范围内
     return (mousePosition.x >= leftBound &&
             mousePosition.x <= rightBound &&
-            mousePosition.y >= topBound &&
-            mousePosition.y <= bottomBound);
+            mousePosition.y >= bottomBound &&
+            mousePosition.y <= topBound);
 }
 
 // 判断猴子是否在一个矩形区域内
@@ -55,28 +55,13 @@ bool Monkey::IsMonkeyInRectangle(glm::vec2 topLeft, glm::vec2 bottomRight) {
     
     // 使用 AABB 碰撞检测来判断是否有重叠
     // 如果一个矩形在另一个矩形的左侧、右侧、上方或下方，则它们不重叠
-    // if (monkeyRight < topLeft.x || 
-    //     monkeyLeft > bottomRight.x || 
-    //     monkeyBottom > topLeft.y || 
-    //     monkeyTop < bottomRight.y) {
-    //     return false;
-    // }
-    if (monkeyRight < topLeft.x) {
-        LOG_DEBUG("通過1 ");
+    if (monkeyRight < topLeft.x || 
+        monkeyLeft > bottomRight.x || 
+        monkeyBottom > topLeft.y || 
+        monkeyTop < bottomRight.y) {
         return false;
     }
-    if (monkeyLeft > bottomRight.x) {
-        LOG_DEBUG("通過2");
-        return false;
-    }
-    if (monkeyBottom > topLeft.y) {
-        LOG_DEBUG("通過3");
-        return false;
-    }
-    if (monkeyTop < bottomRight.y) {
-        LOG_DEBUG("通過4");
-        return false;
-    }
+    
     // 如果没有满足上述任一条件，则矩形重叠
     return true;
 }
@@ -103,30 +88,13 @@ bool Monkey::Touched(Monkey& other){
     
     // 检查两个矩形是否重叠（AABB碰撞检测）
     // 如果一个矩形在另一个矩形的左侧、右侧、上方或下方，则它们不重叠
-    // if (thisRightBound < otherLeftBound || 
-    //     thisLeftBound > otherRightBound || 
-    //     thisBottomBound < otherTopBound || 
-    //     thisTopBound > otherBottomBound) {
-    //     return false;
-    // }
-    if (thisRightBound < otherLeftBound) {
-        LOG_DEBUG("通過1 ");
-        return false;
-    }
-    if (thisLeftBound > otherRightBound) {
-        LOG_DEBUG("通過2");
-        return false;
-    }
-    if (thisBottomBound > otherTopBound) {
-        LOG_DEBUG("通過3");
-        return false;
-    }
-    if (thisTopBound < otherBottomBound) {
-        LOG_DEBUG("通過4");
+    if (thisRightBound < otherLeftBound || 
+        thisLeftBound > otherRightBound || 
+        thisBottomBound > otherTopBound || 
+        thisTopBound < otherBottomBound) {
         return false;
     }
     
-
     // 如果没有满足上述任一条件，则矩形重叠
     return true;
 }
@@ -190,11 +158,13 @@ int Monkey::IsInformationBoardClicked(glm::vec2 mousePosition, int money) {
     if (val[0] == 4) {
         level += 1;
         upgradePath = 1;
+        m_Value += val[1];
         res = val[1];
     }
     else if (val[0] == 5) {
         level += 1;
         upgradePath = 2;
+        m_Value += val[1];
         res = val[1];
     }
     return res;
@@ -227,6 +197,11 @@ bool Monkey::Placeable(std::vector<std::vector<std::vector<glm::vec2>>> Level_Pl
     // 如果猴子不在任何一个矩形区域内，返回true
     return true;
 }
+
+void Monkey::IsButtonTouch(glm::vec2 mousePosition) {
+    m_InformationBoard -> IsButtonTouch(mousePosition);
+}
+
 
 std::vector<std::shared_ptr<Util::GameObject>> Monkey::GetAllInfortionBoardObject() {
     std::vector<std::shared_ptr<Util::GameObject>> infortionBoardObjects = m_InformationBoard -> GetAllChildren();
@@ -490,6 +465,7 @@ BuccaneerMonkey::BuccaneerMonkey(glm::vec2 position) : Monkey(position){
     SetRadius(200);
     UpdateRange();
 }
+
 bool BuccaneerMonkey::Placeable(std::vector<std::vector<std::vector<glm::vec2>>> Level_Placeable){
     // 检查猴子是否在有效区域内
     glm::vec2 size = GetSize();
