@@ -112,5 +112,10 @@ public:
     explicit SuperMonkeyInformationBoard();
 };
 
+class MagicMonkeyInformationBoard : public InformationBoard {
+public:
+    explicit MagicMonkeyInformationBoard();
+};
+
 
 

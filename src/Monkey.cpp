@@ -859,6 +859,9 @@ MagicMonkey::MagicMonkey(glm::vec2 position) : Monkey(position){
     attributes -> SetPower(2);
     attributes -> SetSpeed(80);
 
+    auto &informationBoard = GetInfortionBoard();
+    informationBoard = std::make_shared<MagicMonkeyInformationBoard>();
+
     SetCost(550);
     SetCd(60);
     SetRadius(120);

@@ -375,3 +375,27 @@ SuperMonkeyInformationBoard::SuperMonkeyInformationBoard() {
     upgradeButton2 -> Update("1000");
 }
 
+MagicMonkeyInformationBoard::MagicMonkeyInformationBoard() {
+    // 使用550列的价格数据（中等难度）
+    SetUpgradeCost({{300, 800, 2000, 8000},
+                    {200, 300, 3500, 8000}});
+    // 设置升级路径名称
+    SetUpgradeText({{"Intense Magic", "Lighting Bolt", "Summon Whirlwind", "Tempest Tornado"},
+                    {"Fireball", "Monkey Sense", "Dragon's Breath", "Summon Phoenix"}});
+    auto monkeyImage = GetMonkeyImage();
+    monkeyImage -> SetImage(GA_RESOURCE_DIR"/MonkeyInformation/MagicMonkeyImage.png");
+    SetUpgrateName(GA_RESOURCE_DIR"/MonkeyInformation/MagicMonkey");
+    auto upgradeImage1 = GetUpgrateImage1();
+    upgradeImage1 -> SetImage(GA_RESOURCE_DIR"/MonkeyInformation/MagicMonkey_1_1.png");
+    auto upgradeImage2 = GetUpgrateImage2();
+    upgradeImage2 -> SetImage(GA_RESOURCE_DIR"/MonkeyInformation/MagicMonkey_2_1.png");
+    auto upgradeText1 = GetUpgrateText1();
+    upgradeText1 -> Update("Intense Magic");
+    auto upgradeText2 = GetUpgrateText2();
+    upgradeText2 -> Update("Fireball");
+    auto upgradeButton1 = GetUpgrateButton1();
+    upgradeButton1 -> Update("300");
+    auto upgradeButton2 = GetUpgrateButton2();
+    upgradeButton2 -> Update("200");
+}
+
