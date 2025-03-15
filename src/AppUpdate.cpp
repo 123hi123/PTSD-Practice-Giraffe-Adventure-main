@@ -62,7 +62,7 @@ std::shared_ptr<Balloon> factory(int num, std::vector<glm::vec2> coordinates) {
 
 void App::Update() {
     LOG_TRACE("Update");
-    
+
     if (Util::Input::IsKeyPressed(Util::Keycode::MOUSE_LB) && m_Phase != Phase::LOBBY){
         glm::vec2 position = Util::Input::GetCursorPosition ();
         LOG_DEBUG("Mouse position: " + std::to_string(position.x) + ", " + std::to_string(position.y));
@@ -73,7 +73,7 @@ void App::Update() {
         dragButtonPtr->Update();
         dragButtonPtr->UpdateButtonState(m_Counters[1]->GetCurrent());
     }
-    
+
     glm::vec2 mousePosition = Util::Input::GetCursorPosition();
     // 处理猴子的拖拽逻辑
     if (m_DragMonkey) {
@@ -279,6 +279,11 @@ void App::Update() {
                 std::vector<std::shared_ptr<Util::GameObject>> InfortionBoardObject = m_ClickedMonkey-> GetAllInfortionBoardObject();
                 for (auto& objectPtr : InfortionBoardObject) {
                     m_Root.RemoveChild(objectPtr);
+                }
+                std::vector<std::shared_ptr<Attack>> attacks = m_ClickedMonkey-> GetAttackChildren();
+                for (auto& attacktPtr : attacks) {
+                    m_Attacks.erase(std::remove(m_Attacks.begin(), m_Attacks.end(), attacktPtr), m_Attacks.end());
+                    m_Root.RemoveChild(attacktPtr);
                 }
                 m_Counters[1] -> AddValue(m_ClickedMonkey -> GetValue());
                 m_ClickedMonkey = nullptr;

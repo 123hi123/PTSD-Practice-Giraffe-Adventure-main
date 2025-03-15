@@ -9,7 +9,6 @@ DragButton::DragButton(const glm::vec2& position)
 {
     m_Transform.translation = position;
     m_OriginalSize = m_Size; // 保存原始尺寸
-    m_Buyable = true; // 默认按钮可购买
 }
 
 bool DragButton::IsPointInside(const glm::vec2& point) const {
@@ -17,8 +16,8 @@ bool DragButton::IsPointInside(const glm::vec2& point) const {
     
     float leftBound = m_Transform.translation.x - m_Size.x / 2.0f;
     float rightBound = m_Transform.translation.x + m_Size.x / 2.0f;
-    float topBound = m_Transform.translation.y + m_Size.y / 2.0f;
-    float bottomBound = m_Transform.translation.y - m_Size.y / 2.0f;
+    float topBound = m_Transform.translation.y - m_Size.y / 2.0f;
+    float bottomBound = m_Transform.translation.y + m_Size.y / 2.0f;
     
     // LOG_DEBUG("Button bounds: Left(" + std::to_string(leftBound) +
     //           "), Right(" + std::to_string(rightBound) +
@@ -30,8 +29,8 @@ bool DragButton::IsPointInside(const glm::vec2& point) const {
     
     return (point.x >= leftBound &&
             point.x <= rightBound &&
-            point.y <= topBound &&
-            point.y >= bottomBound);
+            point.y >= topBound &&
+            point.y <= bottomBound);
 }
 void DragButton::SetPosition(const glm::vec2 &position) {
     m_Transform.translation = position;
@@ -80,15 +79,12 @@ void DragButton::Update() {
     } else {
         m_Transform.scale = glm::vec3(1.0f, 1.0f, 1.0f);
     }
-    
-    
 }
 
 
 void DragButton::SetImage(const std::string& ImagePath) {
     m_Drawable = std::make_shared<Util::Image>(ImagePath);
 }
-
 void DragButton::SetOriginImage(const std::string& ImagePath) {
     // 设置原始图片路径
     m_ImagePath = ImagePath;
@@ -106,7 +102,6 @@ void DragButton::SetOriginImage(const std::string& ImagePath) {
     // 使用原始图片初始化按钮
     SetImage(m_ImagePath);
 }
-
 void DragButton::UpdateButtonState(int money) {
     // 基类默认实现，子类会根据各自价格覆盖此方法
 }
