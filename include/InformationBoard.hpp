@@ -23,6 +23,8 @@ public:
     void SetUpgradeCost(std::vector<std::vector<int>> upgradeCost);
     void SetUpgradeText(std::vector<std::vector<std::string>> upgradeText);
     void IsButtonTouch(glm::vec2 mousePosition);
+    void SkillCountDown();
+    void SetSkillEffect(bool b);
 
     [[nodiscard]] std::vector<int> IsClick(glm::vec2 mousePosition, int money);
     [[nodiscard]] int GetLevel() { return level;}
@@ -40,6 +42,9 @@ public:
 private:
     int level = 0;
     int upgradePath = 0;
+    int skillCd = 100; // TODO: 記得換回 1800
+    int skillCount = 0;
+    bool skillEffect = false;
     std::vector<std::vector<int>> m_upgradeCost = {};
     std::vector<std::vector<std::string>> m_upgradeText = {};
     std::string upgrateName = GA_RESOURCE_DIR"//MonkeyInformation/DartMonkey";
@@ -52,6 +57,7 @@ private:
     std::shared_ptr<InformationButton> upgrate_button1 = std::make_shared<InformationButton>(glm::vec2(-370, -35 ), "0");
     std::shared_ptr<InformationButton> upgrate_button2 = std::make_shared<InformationButton>(glm::vec2(-370, -160 ), "0");
     std::shared_ptr<InformationButton> sale_button = std::make_shared<InformationButton>(glm::vec2(-365, -220 ), "Sale");
+    std::shared_ptr<InformationButton> skill_button = std::make_shared<InformationButton>(glm::vec2(-530, -220 ), "Skill");
 };
 
 

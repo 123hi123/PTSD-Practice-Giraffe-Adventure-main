@@ -29,17 +29,26 @@ public:
       void IsButtonTouch(glm::vec2 mousePosition);
       void AddAttackChild(std::shared_ptr<Attack> attack);
       virtual void UpdateLevel();
+      void SetSkillTime(int time);
+      void SetSkillCountdown();
+      void SkillCountdown();
+      virtual void UseSkill();
+      virtual void EndSkill();
 
       bool Touched(Monkey& other);
       bool IsMonkeyInRectangle(glm::vec2 topLeft, glm::vec2 bottomRight);
       virtual bool Placeable(std::vector<std::vector<std::vector<glm::vec2>>> Level_Placeable);
       bool IsInside(glm::vec2 mousePosition);
+      int GetSkillTime() const { return skill_time; }
+      int GetSkillCountdown() const { return skill_countdown; }
+      // bool GetSkillEffect() const { return skillEffect; }
 
       [[nodiscard]] int IsInformationBoardClicked(glm::vec2 mousePosition, int money);
       [[nodiscard]] virtual std::vector<std::shared_ptr<Attack>> ProduceAttack(glm::vec2 goalPosition);
       [[nodiscard]] glm::vec2 GetPosition() const { return m_Transform.translation; }
       [[nodiscard]] int GetCost() const { return m_Cost; }
       [[nodiscard]] int GetValue() const { return (m_Value * 8) / 10;}
+      [[nodiscard]] int GetCd() const { return m_Cd; }
       [[nodiscard]] int GetRadius() const { return m_Radius; }
       [[nodiscard]] int GetLevel() const { return level; }
       [[nodiscard]] int GetUpgradePath() const { return upgradePath; }
@@ -56,6 +65,8 @@ public:
 
 
 private:
+      int skill_time = 0;
+      int skill_countdown = 0;
       int level = 0;
       int upgradePath = 0;
       int m_Cost = 0;
@@ -76,15 +87,24 @@ private:
 class DartMonkey : public Monkey {
 public:
       explicit DartMonkey(glm::vec2 position);
+      void UseSkill() override;
       void UpdateLevel() override;
+      void EndSkill() override;
       [[nodiscard]] std::vector<std::shared_ptr<Attack>> ProduceAttack(glm::vec2 goalPosition) override;
+private:
+      bool skillEffect = false;
+      std::vector<int> cd_radius_tmp = {0, 0};
 };
 
 class NailMonkey : public Monkey {
 public:
       explicit NailMonkey(glm::vec2 position);
       void UpdateLevel() override;
+      void UseSkill() override;
+      void EndSkill() override;
       [[nodiscard]] std::vector<std::shared_ptr<Attack>> ProduceAttack(glm::vec2 goalPosition) override;
+private:
+      bool skillEffect = false;
 };
 
 class SniperMonkey : public Monkey {
@@ -106,6 +126,7 @@ private:
 class NinjaMonkey : public Monkey {
 public:
       explicit NinjaMonkey(glm::vec2 position);
+      void UpdateLevel() override;
       [[nodiscard]] std::vector<std::shared_ptr<Attack>> ProduceAttack(glm::vec2 goalPosition) override;
 };
 

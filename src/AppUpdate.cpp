@@ -5,6 +5,7 @@
 #include "Util/Keycode.hpp"
 #include "Util/Logger.hpp"
 #include <random>
+#include <cxxabi.h>
 
 int count = 20;
 
@@ -270,7 +271,7 @@ void App::Update() {
 
     if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB)) {
         glm::vec2 position = Util::Input::GetCursorPosition ();
-        int clickInformationBoard = 0; //0:無, 1:有, 2:關閉, 3:賣掉, 其他:升級(多少錢回多少
+        int clickInformationBoard = 0; //0:無, 1:有, 2:關閉, 3:賣掉, 4:使用技能, 其他:升級(多少錢回多少
         if (m_ClickedMonkey) {
             clickInformationBoard = m_ClickedMonkey -> IsInformationBoardClicked(position, m_Counters[1] -> GetCurrent());
             if (clickInformationBoard == 2) {
@@ -293,6 +294,21 @@ void App::Update() {
                 m_Counters[1] -> AddValue(m_ClickedMonkey -> GetValue());
                 m_ClickedMonkey = nullptr;
             }
+            else if (clickInformationBoard == 4) {
+                int status;
+                std::string monkeyType = abi::__cxa_demangle(typeid(*m_ClickedMonkey).name(), 0, 0, &status);
+                if (monkeyType == "DartMonkey") {
+                    for (auto& monkeyPtr : m_Monkeys) {
+                        monkeyType = abi::__cxa_demangle(typeid(*monkeyPtr).name(), 0, 0, &status);
+                        if (monkeyType == "DartMonkey") {
+                            monkeyPtr -> UseSkill();
+                        }
+                    }
+                }
+                else if (monkeyType == "NailMonkey") {
+                    m_ClickedMonkey -> UseSkill();
+                }
+            }
             else if (clickInformationBoard != 0 && clickInformationBoard != 1) {
                 m_Counters[1] -> MinusValue(clickInformationBoard);
             }
@@ -308,6 +324,7 @@ void App::Update() {
         }
     }
 
+    // fucking shit
     for (auto& monkeyPtr : m_Monkeys) {
         if (monkeyPtr -> Countdown()) {
             for (auto& balloonPtr : m_Balloons) {
@@ -322,6 +339,18 @@ void App::Update() {
             }
         }
     }
+    for (auto& monkeyPtr : m_Monkeys) {
+        int status;
+        std::string monkeyType = abi::__cxa_demangle(typeid(*monkeyPtr).name(), 0, 0, &status);
+        if (monkeyType == "NailMonkey" && monkeyPtr -> GetSkillCountdown() > 0) {
+            std::vector<std::shared_ptr<Attack>> attacks = monkeyPtr -> ProduceAttack(glm::vec2(100000, 100000));
+            for (auto& attackPtr : attacks) {
+                m_Attacks.push_back(attackPtr);
+                m_Root.AddChild(attackPtr);
+            }
+        }
+    }
+
     for (auto& attackPtr : m_Attacks) {
         attackPtr -> Move();
         if (attackPtr -> IsOut()) {

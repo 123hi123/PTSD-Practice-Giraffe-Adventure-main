@@ -9,6 +9,7 @@
 Monkey::Monkey(glm::vec2 position)
 {
     SetPosition(position);
+    SetSkillTime(600); //技能持續時間
 }
 
 void Monkey::SetPosition(const glm::vec2& Position){
@@ -42,6 +43,14 @@ bool Monkey::IsInside(glm::vec2 mousePosition){
             mousePosition.x <= rightBound &&
             mousePosition.y >= bottomBound &&
             mousePosition.y <= topBound);
+}
+
+void Monkey::SetSkillTime(int time) {
+    skill_time = time;
+}
+
+void Monkey::SetSkillCountdown() {
+    skill_countdown = skill_time;
 }
 
 // 判断猴子是否在一个矩形区域内
@@ -142,6 +151,8 @@ void Monkey::SetRotation(glm::vec2 Position) {
 }
 
 bool Monkey::Countdown() {
+    SkillCountdown();
+    m_InformationBoard -> SkillCountDown();
     if (m_Count == m_Cd) {
         return true;
     }
@@ -156,14 +167,14 @@ void Monkey::ResetCount(){
 int Monkey::IsInformationBoardClicked(glm::vec2 mousePosition, int money) {
     std::vector<int> val = m_InformationBoard -> IsClick(mousePosition, money);
     int res = val[0];
-    if (val[0] == 4) {
+    if (val[0] == 5) {
         level += 1;
         upgradePath = 1;
         UpdateLevel();
         m_Value += val[1];
         res = val[1];
     }
-    else if (val[0] == 5) {
+    else if (val[0] == 6) {
         level += 1;
         upgradePath = 2;
         UpdateLevel();
@@ -213,11 +224,21 @@ std::vector<std::shared_ptr<Util::GameObject>> Monkey::GetAllInfortionBoardObjec
 
 void Monkey::UpdateAllObjectVisible(bool isClicked) {
     m_Range -> SetVisible(isClicked);
-    m_InformationBoard -> SetVisible(isClicked);
     m_InformationBoard -> UpdateAllObjectVisible(isClicked);
 }
 
 void Monkey::UpdateLevel() {}
+
+void Monkey::UseSkill(){}
+
+void Monkey::EndSkill(){}
+
+void Monkey::SkillCountdown() {
+    skill_countdown -= 1;
+    if (skill_countdown == 0) {
+        EndSkill();
+    }
+}
 
 // ####################################################################
 
@@ -240,13 +261,51 @@ DartMonkey::DartMonkey(glm::vec2 position) : Monkey(position){
     UpdateRange();
 }
 
+void DartMonkey::UseSkill() {
+    skillEffect = true;
+    SetSkillCountdown();
+    SetImage(GA_RESOURCE_DIR"/Monkey/SuperMonkey.png");
+    cd_radius_tmp = {GetCd(), GetRadius()};
+    SetCd(20);
+    ResetCount();
+    SetRadius(300);
+    UpdateRange();
+    auto informationBoard = GetInfortionBoard();
+    informationBoard -> SetSkillEffect(true);
+}
+
+void DartMonkey::EndSkill() {
+    skillEffect = false;
+    SetImage(GA_RESOURCE_DIR"/Monkey/DartMonkey.png");
+    SetCd(cd_radius_tmp[0]);
+    ResetCount();
+    SetRadius(cd_radius_tmp[1]);
+    UpdateRange();
+    auto informationBoard = GetInfortionBoard();
+    informationBoard -> SetSkillEffect(false);
+}
+
 std::vector<std::shared_ptr<Attack>> DartMonkey::ProduceAttack(glm::vec2 goalPosition) {
     ResetCount();
     SetRotation(goalPosition);
     int level = GetLevel();
     int upgradePath = GetUpgradePath();
     std::vector<std::shared_ptr<Attack>> attacks;
-    if (upgradePath == 1 && level >= 3) {
+    if (skillEffect == true) {
+        glm::vec2 direction = goalPosition - m_Transform.translation;
+        glm::vec2 unit_direction = glm::normalize(direction);
+        double perp_x = -unit_direction.y;
+        double perp_y = unit_direction.x;
+        int distance = 15;
+
+        glm::vec2 movePosition = glm::vec2(distance * perp_x, distance * perp_y);
+
+        std::shared_ptr<Attack> attack = std::make_shared<Ray>(GetPosition()+movePosition, goalPosition+movePosition, GetAttributes());
+        attacks.push_back(attack);
+        attack = std::make_shared<Ray>(GetPosition()-movePosition, goalPosition-movePosition, GetAttributes());
+        attacks.push_back(attack);
+    }
+    else if (upgradePath == 1 && level >= 3) {
         std::shared_ptr<Attack> attack = std::make_shared<Rock>(GetPosition(), goalPosition, GetAttributes());
         attacks.push_back(attack);
     }
@@ -328,7 +387,20 @@ NailMonkey::NailMonkey(glm::vec2 position) : Monkey(position){
     SetSize(glm::vec2(50.0f, 50.0f));
     SetCd(80);
     SetRadius(150);
+    SetSkillTime(450);  // 技能持续时间
     UpdateRange();
+}
+
+void NailMonkey::UseSkill() {
+    // 实现技能使用逻辑
+    skillEffect = true;
+    SetSkillCountdown();
+
+}
+
+void NailMonkey::EndSkill() {
+    // 实现技能结束逻辑
+    skillEffect = false;
 }
 
 std::vector<std::shared_ptr<Attack>> NailMonkey::ProduceAttack(glm::vec2 goalPosition) {
@@ -336,6 +408,61 @@ std::vector<std::shared_ptr<Attack>> NailMonkey::ProduceAttack(glm::vec2 goalPos
     int level = GetLevel();
     int upgradePath = GetUpgradePath();
     std::vector<std::shared_ptr<Attack>> attacks;
+    if (skillEffect == true) {
+        // 設置固定半徑
+        float radius = 30.0f;  // 改回合理的半徑值，防止飛太遠看不到
+        int skillTime = GetSkillTime();
+        int skillCountdown = GetSkillCountdown();
+        
+        // 直接使用skillCountdown計算旋轉角度
+        float anglePerTick = PI/15; // 每tick旋转角度
+        float angle = skillCountdown * anglePerTick;
+        
+        // 計算圓周上的點(作為攻擊起始點)
+        float x1 = m_Transform.translation.x + radius * cos(angle);
+        float y1 = m_Transform.translation.y + radius * sin(angle);
+        float x2 = m_Transform.translation.x + radius * cos(angle + PI);
+        float y2 = m_Transform.translation.y + radius * sin(angle + PI);
+        
+        // 計算切線方向(攻擊移動方向)
+        float tangent_x1 = -sin(angle);  // 切線x分量
+        float tangent_y1 = cos(angle);   // 切線y分量
+        float tangent_x2 = -sin(angle + PI);
+        float tangent_y2 = cos(angle + PI);
+        
+        // 計算目標點(沿切線方向)
+        float target_x1 = x1 + tangent_x1 * 100;  // 沿切線前進100單位(可調整)
+        float target_y1 = y1 + tangent_y1 * 100;
+        float target_x2 = x2 + tangent_x2 * 100;
+        float target_y2 = y2 + tangent_y2 * 100;
+        
+        // 創建兩個攻擊，起始點是圓周上的點
+        std::shared_ptr<Attack> attack1 = std::make_shared<Knife>(
+            glm::vec2(x1, y1),  // 從圓周上的點發射
+            glm::vec2(target_x1, target_y1),  // 目標是沿切線方向
+            9999999.0f,  // 極大值作為無限半徑
+            GetAttributes()
+        );
+        std::shared_ptr<Attack> attack2 = std::make_shared<Knife>(
+            glm::vec2(x2, y2),  // 從圓周上的對稱點發射
+            glm::vec2(target_x2, target_y2),  // 目標是沿切線方向
+            9999999.0f,  // 極大值作為無限半徑
+            GetAttributes()
+        );
+        
+        // 調整速度和大小
+        attack1->SetSpeed(attack1->GetSpeed() * 0.5f);
+        attack2->SetSpeed(attack2->GetSpeed() * 0.5f);
+        
+        attacks.push_back(attack1);
+        attacks.push_back(attack2);
+        
+        return attacks;
+    }
+    // if (goalPosition == glm::vec2(100000, 100000)) {
+    //     return {};
+    // }
+
     if (upgradePath == 1 && level == 4) {
         std::shared_ptr<Attack> attack = std::make_shared<Fire>(GetPosition(), goalPosition, GetAttributes(), GetRadius());
         attacks.push_back(attack);
@@ -569,12 +696,13 @@ NinjaMonkey::NinjaMonkey(glm::vec2 position) : Monkey(position){
     attributes -> SetPenetration(1);
     attributes -> SetPower(1);
     attributes -> SetSpeed(60);
+    attributes -> AddProperty(2);
 
     auto &informationBoard = GetInfortionBoard();
     informationBoard = std::make_shared<NinjaMonkeyInformationBoard>();
 
     SetCost(600);
-    SetCd(30);
+    SetCd(50);
     SetRadius(150);
     UpdateRange();
 }
@@ -582,10 +710,41 @@ NinjaMonkey::NinjaMonkey(glm::vec2 position) : Monkey(position){
 std::vector<std::shared_ptr<Attack>> NinjaMonkey::ProduceAttack(glm::vec2 goalPosition) {
     ResetCount();
     SetRotation(goalPosition);
+    int level = GetLevel();
+    int upgradePath = GetUpgradePath();
     std::vector<std::shared_ptr<Attack>> attacks;
+    if (upgradePath == 1 && level >= 3) {
+        std::shared_ptr<Attack> attack = std::make_shared<Shuriken>(GetPosition(), goalPosition, GetAttributes());
+        attacks.push_back(attack);
+        if (upgradePath == 1 && level == 4) {
+            for (int i = 0; i < 3; i++) {
+                std::shared_ptr<Attack> attack = std::make_shared<Shuriken>(GetPosition(), goalPosition, GetAttributes());
+                attacks.push_back(attack);
+            }
+        }
+    }
     std::shared_ptr<Attack> attack = std::make_shared<Shuriken>(GetPosition(), goalPosition, GetAttributes());
     attacks.push_back(attack);
     return attacks;
+}
+
+void NinjaMonkey::UpdateLevel() {
+    int level = GetLevel();
+    int upgradePath = GetUpgradePath();
+    auto attributes = GetAttributes();
+    if (upgradePath == 1) {
+        switch (level) {
+            case 1:
+                SetCd(30);
+                ResetCount();
+                SetRadius(GetRadius()*1.5);
+                UpdateRange();
+            case 2:
+                attributes -> SetPenetration(4);
+        }
+    }
+    else {
+    }
 }
 
 //########################################################################
