@@ -11,7 +11,7 @@
 class Attack : public Util::GameObject {
 public:
     explicit Attack(glm::vec2 position, glm::vec2 goal_position, std::shared_ptr<Attributes> attributes);
-
+    explicit Attack(glm::vec2 position);
     void SetPosition(const glm::vec2& Position);
     void SetWidth(int width);
     void SetHeight(int height);
@@ -211,4 +211,29 @@ private:
     int max_Penetration = 0;
     bool WillNotDisappear = true;
     glm::vec2 m_SourcePosition;
+};
+
+
+//###########################################################
+
+
+class Explosive_cannon : public Attack {
+public:
+    explicit Explosive_cannon(glm::vec2 position);
+    void Move() override;
+    [[nodiscard]] bool IsOut() override;
+    [[nodiscard]] bool IsAlive() override;
+    void RotationImage();
+private:
+    int time = 3;
+};
+
+class RockNinja : public Attack {
+public:
+    explicit RockNinja(glm::vec2 position);
+    void Move() override;
+    [[nodiscard]] bool IsOut() override;
+    [[nodiscard]] bool IsAlive() override;
+private:
+    int time = 600;
 };

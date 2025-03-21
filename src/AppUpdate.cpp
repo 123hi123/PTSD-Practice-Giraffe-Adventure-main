@@ -8,7 +8,8 @@
 #include <cxxabi.h>
 
 int count = 20;
-
+bool blocked = false;
+int block_time = 0;
 std::vector<std::shared_ptr<Balloon>> new_balloons;
 std::vector<std::shared_ptr<Balloon>> remove_balloons;
 std::vector<std::shared_ptr<Attack>> remove_attacks;
@@ -68,6 +69,12 @@ void App::Update() {
     //     m_Counters[1]->AddValue(100); // 添加100金钱
     //     LOG_DEBUG("添加了100金钱");
     // }
+    if (blocked) {
+        block_time -= 1;
+        if (block_time == 0) {
+            blocked = false;
+        }
+    }
 
     if (Util::Input::IsKeyPressed(Util::Keycode::MOUSE_LB) && m_Phase != Phase::LOBBY){
         glm::vec2 position = Util::Input::GetCursorPosition ();
@@ -171,7 +178,7 @@ void App::Update() {
             m_Counters[2] -> AddValue(1);
         }
         std::shared_ptr<Balloon> m_Balloon;
-        if (!Level_Balloons[round].empty()) {
+        if (!Level_Balloons[round].empty() && !blocked) {
             int num = Level_Balloons[round][0];
             Level_Balloons[round].erase(Level_Balloons[round].begin());
             m_Balloon = factory(num, Level_Coordinates);
@@ -307,6 +314,40 @@ void App::Update() {
                 }
                 else if (monkeyType == "NailMonkey") {
                     m_ClickedMonkey -> UseSkill();
+                }
+                else if (monkeyType == "RubberMonkey") {
+                    for (auto& BalloonPtr : m_Balloons) {
+                        BalloonPtr -> GetDebuff(m_ClickedMonkey -> GetAttributes() -> GetDebuff());
+                    }
+                }
+                else if (monkeyType == "IceMonkey") {
+                    for (auto& BalloonPtr : m_Balloons) {
+                        if (BalloonPtr -> GetType() != Balloon::Type::spaceship) {
+                            BalloonPtr -> GetDebuff({{1, 240}});
+                        }
+                    }
+                }
+                else if (monkeyType == "Cannon") {
+                    for (auto& BalloonPtr : m_Balloons) {
+                        if (BalloonPtr -> GetType() == Balloon::Type::spaceship) {
+                            BalloonPtr -> LoseHealth(1000);
+                            auto explosive_cannon = std::make_shared<Explosive_cannon>(BalloonPtr -> GetPosition());
+                            m_Attacks.push_back(explosive_cannon);
+                            m_Root.AddChild(explosive_cannon);
+                            break;
+                        }
+                    }
+                }
+                else if (monkeyType == "NinjaMonkey") {
+                    blocked = true;
+                    block_time = 600;
+                    glm::vec2 position = Level_Coordinates[0];
+                    for (auto& balloonPtr : m_Balloons) {
+                        balloonPtr -> GetDebuff({{4, 600}});
+                    }
+                    auto rock_ninja = std::make_shared<RockNinja>(position);
+                    m_Attacks.push_back(rock_ninja);
+                    m_Root.AddChild(rock_ninja);
                 }
             }
             else if (clickInformationBoard != 0 && clickInformationBoard != 1) {

@@ -165,7 +165,7 @@ void Balloon::GetDebuff(std::vector<std::vector<int>> debuff) {
 }
 
 std::vector<std::shared_ptr<Util::GameObject>> Balloon::GetDebuffViews() {
-    return {snow, ice, rubber};
+    return {snow, ice, rubber, rock_ninja};
 }
 
 float Balloon::UpdateDebuff() {
@@ -175,15 +175,17 @@ float Balloon::UpdateDebuff() {
             if (i == 0) { snow -> Update(GetPosition(), true); }
             else if (i == 1) { ice -> Update(GetPosition(), true); }
             else if (i == 2) { rubber -> Update(GetPosition(), true); }
+            else if (i == 4) { rock_ninja -> Update(GetPosition(), true); }//confirmed
             slow *= debuff_slow[i];
             m_Debuff[i] -= 1;
         }
         else if (i == 0) { snow -> Update(GetPosition(), false); }
         else if (i == 1) { ice -> Update(GetPosition(), false); }
         else if (i == 2) { rubber -> Update(GetPosition(), false); }
+        else if (i == 4) { rock_ninja -> Update(GetPosition(), false); }
     }
     return slow;
-};
+}
 
 void Balloon::SetType(Balloon::Type type) {
     m_Type = type;

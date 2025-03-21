@@ -73,11 +73,10 @@ private:
     std::shared_ptr<DebuffView> snow =  std::make_shared<Snow>();
     std::shared_ptr<DebuffView> ice =  std::make_shared<Ice>();
     std::shared_ptr<DebuffView> rubber =  std::make_shared<Mucus>();
-    std::vector<int> m_Debuff = {0, 0, 0, 0};
-    std::vector<float> debuff_slow = {0.5, 0, 0.2, 0};
+    std::shared_ptr<DebuffView> rock_ninja =  std::make_shared<RockNinjaDebuff>();
+    std::vector<int> m_Debuff = {0, 0, 0, 0, 0};
+    std::vector<float> debuff_slow = {0.5, 0, 0.2, 0, 0.5}; // 減速
 };
-
-#endif // BALLOON_HPP
 
 class RED : public Balloon {
 public:
@@ -185,4 +184,6 @@ public:
     void Injured() override;
     [[nodiscard]] std::vector<std::shared_ptr<Balloon>> Burst() const override;
 };
+
+#endif // BALLOON_HPP
 

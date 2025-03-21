@@ -3,6 +3,11 @@
 #include <random>
 #include "Util/Logger.hpp"
 #define PI 3.14159265358979323846
+Attack::Attack(glm::vec2 position)
+{
+    m_Attributes = std::make_shared<Attributes>();
+    SetPosition(position);
+}
 
 Attack::Attack(glm::vec2 position, glm::vec2 goal_position, std::shared_ptr<Attributes> attributes)
 {
@@ -638,5 +643,55 @@ void BladedDisc_Around::RotationImage() {
 }
 
 [[nodiscard]] bool BladedDisc_Around::IsOut() {
+    return false;
+}
+
+//###########################################################
+
+Explosive_cannon::Explosive_cannon(glm::vec2 position)
+: Attack(position){
+    SetPosition(position);
+    
+}
+
+void Explosive_cannon::Move() {
+    return;
+}
+
+[[nodiscard]] bool Explosive_cannon::IsOut() {
+    if (time == 0) {
+        return true;
+    }
+    SetImage(GA_RESOURCE_DIR"/Attack/Explosive_cannon_" + std::to_string(time) + ".png");
+    time -= 1;
+    
+    return false;
+}
+
+[[nodiscard]] bool Explosive_cannon::IsAlive() {
+    return false;
+}
+
+//###########################################################
+
+RockNinja::RockNinja(glm::vec2 position)
+: Attack(position){
+    SetPosition(position);
+    SetImage(GA_RESOURCE_DIR"/Attack/rock_ninja.png");
+}
+
+void RockNinja::Move() {
+    return;
+}
+[[nodiscard]] bool RockNinja::IsOut() {
+    if (time == 0) {
+        return true;
+    }
+    time -= 1;
+    
+    return false;
+}
+
+[[nodiscard]] bool RockNinja::IsAlive() {
     return false;
 }
