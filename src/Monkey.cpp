@@ -623,6 +623,21 @@ BoomerangMonkey::BoomerangMonkey(glm::vec2 position) : Monkey(position){
     UpdateRange();
     SetSize(glm::vec2(50.0f, 50.0f));
 }
+void BoomerangMonkey::UseSkill() {
+    skillEffect = true;
+    SetImage(GA_RESOURCE_DIR"/Monkey/BoomerangMonkey_skilling.png");
+    original_cd = GetCd();
+    SetCd(10);
+    ResetCount();
+    SetSkillCountdown();
+}
+
+void BoomerangMonkey::EndSkill() {
+    skillEffect = false;
+    SetImage(GA_RESOURCE_DIR"/Monkey/BoomerangMonkey.png");
+    SetCd(original_cd);
+    ResetCount();
+}
 
 std::vector<std::shared_ptr<Attack>> BoomerangMonkey::ProduceAttack(glm::vec2 goalPosition) {
     ResetCount();
@@ -912,7 +927,7 @@ SuperMonkey::SuperMonkey(glm::vec2 position) : Monkey(position){
     attributes -> SetPenetration(1);
     attributes -> SetPower(3);
     attributes -> SetSpeed(60);
-
+    SetSkillTime(200);
     auto &informationBoard = GetInfortionBoard();
     informationBoard = std::make_shared<SuperMonkeyInformationBoard>();
 
@@ -922,6 +937,14 @@ SuperMonkey::SuperMonkey(glm::vec2 position) : Monkey(position){
     UpdateRange();
 }
 
+void SuperMonkey::UseSkill() {
+    skillEffect = true;
+
+    SetSkillCountdown();
+}
+void SuperMonkey::EndSkill() {
+    skillEffect = false;
+}
 std::vector<std::shared_ptr<Attack>> SuperMonkey::ProduceAttack(glm::vec2 goalPosition) {
     ResetCount();
     SetRotation(goalPosition);

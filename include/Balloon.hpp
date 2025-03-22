@@ -35,9 +35,14 @@ public:
     void GetDebuff(std::vector<std::vector<int>> debuff);
     void Move();
     void SetType(Balloon::Type type);
+    void AddProperty(int property);
     virtual void Injured();
 
+
+
+    [[nodiscard]] int IsAttackEffective(std::vector<int> properties, int power);
     [[nodiscard]] virtual std::vector<std::shared_ptr<Balloon>> Burst() const;
+    [[nodiscard]] int GetProperty(int n);
 
     [[nodiscard]] bool IsCollision(const std::shared_ptr<Attack>& other);
     [[nodiscard]] bool IsAlive() const { return m_Health > 0;};
@@ -69,6 +74,7 @@ private:
     std::string m_ImagePath;
     std::vector<glm::vec2> m_Coordinates;
     std::vector<glm::vec2> m_Corners = {glm::vec2(0,0), glm::vec2(0,0), glm::vec2(0,0), glm::vec2(0,0)};
+    std::vector<int> m_Properties = {0};
 
     std::shared_ptr<DebuffView> snow =  std::make_shared<Snow>();
     std::shared_ptr<DebuffView> ice =  std::make_shared<Ice>();

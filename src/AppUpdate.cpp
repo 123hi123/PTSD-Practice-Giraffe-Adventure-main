@@ -201,7 +201,7 @@ void App::Update() {
         for (auto& attackPtr : m_Attacks) {
             if (attackPtr -> IsAlive() && balloonPtr -> IsCollision(attackPtr)){
                 underAttack = true;
-                balloonPtr -> LoseHealth(attackPtr -> GetPower());
+                balloonPtr -> LoseHealth(balloonPtr -> IsAttackEffective(attackPtr -> GetProperties(), attackPtr -> GetPower()));balloonPtr -> LoseHealth(attackPtr -> GetPower());
                 balloonPtr -> GetDebuff(attackPtr -> GetAttributes() -> GetDebuff());
                 attackPtr -> LosePenetration();
                 if (!attackPtr -> IsAlive()) {
@@ -237,13 +237,41 @@ void App::Update() {
     }
 
     remove_balloons = {};
-
     for (auto& balloonPtr : m_Balloons) {
         balloonPtr -> Move();
         if (balloonPtr -> IsArrive()) {
             remove_balloons.push_back(balloonPtr);
             m_Counters[0] ->MinusValue(1);
         }
+    }
+    // passive skill every screen effect
+    for (auto& monkeyPtr : m_Monkeys) {
+        int status;
+        std::string monkeyType = abi::__cxa_demangle(typeid(*monkeyPtr).name(), 0, 0, &status);
+        if (monkeyType == "NailMonkey" && monkeyPtr -> GetSkillCountdown() > 0) {
+            std::vector<std::shared_ptr<Attack>> attacks = monkeyPtr -> ProduceAttack(glm::vec2(100000, 100000));
+            for (auto& attackPtr : attacks) {
+                m_Attacks.push_back(attackPtr);
+                m_Root.AddChild(attackPtr);
+            }
+        }
+        else if (monkeyType == "SuperMonkey" && monkeyPtr -> GetSkillCountdown() > 0 ) {
+            if (!m_Balloons.empty()) {  // 首先检查数组是否为空
+                std::shared_ptr<Balloon> balloonPtr = m_Balloons[0];
+                if (balloonPtr) {  // 再次确认指针不为空
+                    if (balloonPtr->GetType() == Balloon::Type::spaceship) {
+                        balloonPtr->LoseHealth(1000);
+                    } else {
+                        remove_balloons.push_back(balloonPtr);
+                    }
+                    auto explosive_cannon = std::make_shared<Explosive_cannon>(balloonPtr->GetPosition());
+                    m_Attacks.push_back(explosive_cannon);
+                    m_Root.AddChild(explosive_cannon);
+                    // LOG_DEBUG(balloonPtr -> GetType());
+                }
+            }
+        }
+
     }
 
     for (auto& balloonPtr : remove_balloons) {
@@ -349,6 +377,31 @@ void App::Update() {
                     m_Attacks.push_back(rock_ninja);
                     m_Root.AddChild(rock_ninja);
                 }
+                else if (monkeyType == "BoomerangMonkey") {
+                    m_ClickedMonkey -> UseSkill();
+                }
+                else if (monkeyType == "SuperMonkey") {
+                    m_ClickedMonkey -> UseSkill();
+                    // int count = 0;
+                    // for (auto& BalloonPtr : m_Balloons) {
+                    //     count ++;
+                    //     if (count > 200) {
+                    //         break;
+                    //     }
+                    //     // BalloonPtr -> LoseHealth(1000);
+                    //     // auto explosive_cannon = std::make_shared<Explosive_cannon>(BalloonPtr -> GetPosition());
+                    //     // m_Attacks.push_back(explosive_cannon);
+                    //     // m_Root.AddChild(explosive_cannon);
+                    //     if (BalloonPtr -> GetType() == Balloon::Type::spaceship) {
+                    //         BalloonPtr -> LoseHealth(1000);
+                    //         auto explosive_cannon = std::make_shared<Explosive_cannon>(BalloonPtr -> GetPosition());
+                    //         m_Attacks.push_back(explosive_cannon);
+                    //         m_Root.AddChild(explosive_cannon);
+                    //     }else{
+                    //         BalloonPtr -> SetHealth(0);
+                    //     }
+                    // }
+                }
             }
             else if (clickInformationBoard != 0 && clickInformationBoard != 1) {
                 m_Counters[1] -> MinusValue(clickInformationBoard);
@@ -368,7 +421,17 @@ void App::Update() {
     // fucking shit
     for (auto& monkeyPtr : m_Monkeys) {
         if (monkeyPtr -> Countdown()) {
+            
+            std::vector<int> properties = monkeyPtr -> GetProperties();
+            std::sort(properties.begin(), properties.end());
+            bool camouflage = std::binary_search(properties.begin(), properties.end(), 2);
+            //
             for (auto& balloonPtr : m_Balloons) {
+
+                if (balloonPtr -> GetProperty(1) == 2 && !camouflage) {
+                    continue;
+                }
+
                 if (monkeyPtr -> IsCollision(balloonPtr)) {
                     std::vector<std::shared_ptr<Attack>> attacks = monkeyPtr -> ProduceAttack(balloonPtr->GetPosition());
                     for (auto& attackPtra : attacks) {
@@ -380,17 +443,8 @@ void App::Update() {
             }
         }
     }
-    for (auto& monkeyPtr : m_Monkeys) {
-        int status;
-        std::string monkeyType = abi::__cxa_demangle(typeid(*monkeyPtr).name(), 0, 0, &status);
-        if (monkeyType == "NailMonkey" && monkeyPtr -> GetSkillCountdown() > 0) {
-            std::vector<std::shared_ptr<Attack>> attacks = monkeyPtr -> ProduceAttack(glm::vec2(100000, 100000));
-            for (auto& attackPtr : attacks) {
-                m_Attacks.push_back(attackPtr);
-                m_Root.AddChild(attackPtr);
-            }
-        }
-    }
+    
+    
 
     for (auto& attackPtr : m_Attacks) {
         attackPtr -> Move();
