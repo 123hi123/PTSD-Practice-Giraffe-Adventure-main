@@ -10,9 +10,14 @@
 int count = 20;
 bool blocked = false;
 int block_time = 0;
+int nuclear_bomb_time = 0;
+
+std::vector<std::pair<std::shared_ptr<Balloon>, std::shared_ptr<Rope_tail>>> grabbedBalloons; // 存儲所有正在被拉動的氣球
+
 std::vector<std::shared_ptr<Balloon>> new_balloons;
 std::vector<std::shared_ptr<Balloon>> remove_balloons;
 std::vector<std::shared_ptr<Attack>> remove_attacks;
+std::vector<std::shared_ptr<Attack>> m_drops;
 std::shared_ptr<Monkey> m_testMonkey;
 std::shared_ptr<Balloon> factory(int num, std::vector<glm::vec2> coordinates) {
     switch (num) {
@@ -64,20 +69,76 @@ std::shared_ptr<Balloon> factory(int num, std::vector<glm::vec2> coordinates) {
 
 void App::Update() {
     LOG_TRACE("Update");
-    // if (Util::Input::IsKeyPressed(Util::Keycode::W) && m_Phase == Phase::LOBBY) {
-    //     // 添加金钱，假设m_Counters[1]是金钱计数器
-    //     m_Counters[1]->AddValue(100); // 添加100金钱
-    //     LOG_DEBUG("添加了100金钱");
-    // }
+    remove_balloons = {};
+    // for dropbox
+    std::vector<std::shared_ptr<Attack>> remove_drops;
+    for (auto& dropboxPtr : m_drops) {
+        if (dropboxPtr -> IsOut()) {
+            //add the money to the counter
+            m_Counters[1] -> AddValue(20000);
+            remove_drops.push_back(dropboxPtr);
+        }
+    }
+    for (auto& dropboxPtr : remove_drops) {
+        m_drops.erase(std::remove(m_drops.begin(), m_drops.end(), dropboxPtr), m_drops.end());
+        m_Root.RemoveChild(dropboxPtr);
+    }
+    //for dropbox end
+    // skill countdown area start
     if (blocked) {
         block_time -= 1;
         if (block_time == 0) {
             blocked = false;
         }
     }
+    if (nuclear_bomb_time>0){
+        nuclear_bomb_time -= 1;
+        if (nuclear_bomb_time == 0){
+            for (auto& balloonPtr : m_Balloons) {
+                balloonPtr -> LoseHealth(350);
+            }
+        }
+    }
+    // 在更新循環裡處理被抓取的氣球
+    if (!grabbedBalloons.empty()) {
+        std::vector<size_t> finishedIndices; // 儲存已完成移動的氣球索引
+        
+        for (size_t i = 0; i < grabbedBalloons.size(); ++i) {
+            auto rope = std::make_shared<Rope>(grabbedBalloons[i].second->GetSourcePosition(), grabbedBalloons[i].second->GetPosition(), std::make_shared<Attributes>());
+            m_Attacks.push_back(rope);
+            m_Root.AddChild(rope);
+            if (grabbedBalloons[i].second -> CheckAndReverse()){
+                grabbedBalloons[i].first -> Move();
+                // LOG_DEBUG("move...");
+            }
+            // LOG_DEBUG("check out");
+            if (grabbedBalloons[i].second -> IsOut()){
+                // LOG_DEBUG("out");
+                finishedIndices.push_back(i);
+                auto boom = std::make_shared<Explosive_cannon>(grabbedBalloons[i].second->GetPosition());
+                boom -> SetScale(glm::vec2(0.3, 0.3));
+                m_Attacks.push_back(boom);
+                m_Root.AddChild(boom);
+            }
+        }
+        
+        // 從列表中移除已完成的項目（從後往前刪除，避免索引變化）
+        std::sort(finishedIndices.begin(), finishedIndices.end(), std::greater<size_t>());
+        for (auto idx : finishedIndices) {
+            if (idx < grabbedBalloons.size()) {
+                for (auto& debuffPtr : grabbedBalloons[idx].first -> GetDebuffViews()) {
+                    m_Root.RemoveChild(debuffPtr);
+                }
+                m_Root.RemoveChild(grabbedBalloons[idx].first);
+                grabbedBalloons.erase(grabbedBalloons.begin() + idx);
+            }
+        }
+    }
+    // skill countdown area end
 
     if (Util::Input::IsKeyPressed(Util::Keycode::MOUSE_LB) && m_Phase != Phase::LOBBY){
         glm::vec2 position = Util::Input::GetCursorPosition ();
+        
         LOG_DEBUG("Mouse position: " + std::to_string(position.x) + ", " + std::to_string(position.y));
     }
 
@@ -201,7 +262,7 @@ void App::Update() {
         for (auto& attackPtr : m_Attacks) {
             if (attackPtr -> IsAlive() && balloonPtr -> IsCollision(attackPtr)){
                 underAttack = true;
-                balloonPtr -> LoseHealth(balloonPtr -> IsAttackEffective(attackPtr -> GetProperties(), attackPtr -> GetPower()));balloonPtr -> LoseHealth(attackPtr -> GetPower());
+                balloonPtr -> LoseHealth(balloonPtr -> IsAttackEffective(attackPtr -> GetProperties(), attackPtr -> GetPower()));
                 balloonPtr -> GetDebuff(attackPtr -> GetAttributes() -> GetDebuff());
                 attackPtr -> LosePenetration();
                 if (!attackPtr -> IsAlive()) {
@@ -236,7 +297,7 @@ void App::Update() {
         m_Root.RemoveChild(balloonPtr);
     }
 
-    remove_balloons = {};
+    
     for (auto& balloonPtr : m_Balloons) {
         balloonPtr -> Move();
         if (balloonPtr -> IsArrive()) {
@@ -260,11 +321,12 @@ void App::Update() {
                 std::shared_ptr<Balloon> balloonPtr = m_Balloons[0];
                 if (balloonPtr) {  // 再次确认指针不为空
                     if (balloonPtr->GetType() == Balloon::Type::spaceship) {
-                        balloonPtr->LoseHealth(1000);
+                        balloonPtr->LoseHealth(200);
                     } else {
                         remove_balloons.push_back(balloonPtr);
                     }
                     auto explosive_cannon = std::make_shared<Explosive_cannon>(balloonPtr->GetPosition());
+                    explosive_cannon -> SetScale(glm::vec2(0.3, 0.3));
                     m_Attacks.push_back(explosive_cannon);
                     m_Root.AddChild(explosive_cannon);
                     // LOG_DEBUG(balloonPtr -> GetType());
@@ -382,25 +444,42 @@ void App::Update() {
                 }
                 else if (monkeyType == "SuperMonkey") {
                     m_ClickedMonkey -> UseSkill();
-                    // int count = 0;
-                    // for (auto& BalloonPtr : m_Balloons) {
-                    //     count ++;
-                    //     if (count > 200) {
-                    //         break;
-                    //     }
-                    //     // BalloonPtr -> LoseHealth(1000);
-                    //     // auto explosive_cannon = std::make_shared<Explosive_cannon>(BalloonPtr -> GetPosition());
-                    //     // m_Attacks.push_back(explosive_cannon);
-                    //     // m_Root.AddChild(explosive_cannon);
-                    //     if (BalloonPtr -> GetType() == Balloon::Type::spaceship) {
-                    //         BalloonPtr -> LoseHealth(1000);
-                    //         auto explosive_cannon = std::make_shared<Explosive_cannon>(BalloonPtr -> GetPosition());
-                    //         m_Attacks.push_back(explosive_cannon);
-                    //         m_Root.AddChild(explosive_cannon);
-                    //     }else{
-                    //         BalloonPtr -> SetHealth(0);
-                    //     }
-                    // }
+                }
+                else if (monkeyType == "Airport") {                    
+                    auto nuclear_bomb = std::make_shared<Nuclear_bomb>(glm::vec2(0.0, 0.0));
+                    m_Attacks.push_back(nuclear_bomb);
+                    m_Root.AddChild(nuclear_bomb);
+                    nuclear_bomb_time = 138;
+                }
+                else if (monkeyType == "BuccaneerMonkey") {
+                    // 找最前頭的飛船氣球
+                    // remove_balloons = {};
+                    for (size_t i = 0; i < m_Balloons.size(); i++) {
+                        if (m_Balloons[i]->GetType() == Balloon::Type::spaceship && m_Balloons[i] -> GetHealth() > 0) { // make sure to not grab the bust ballone
+                        // but actually it will not happen,  cause i move it from the m_Balloons list so even the balloon health is 0, it cant active burst
+                            auto balloonPtr = m_Balloons[i];
+                            auto rope_tail = std::make_shared<Rope_tail>(m_ClickedMonkey->GetPosition(), balloonPtr->GetPosition(), m_ClickedMonkey->GetAttributes());
+                            m_Attacks.push_back(rope_tail);
+                            m_Root.AddChild(rope_tail);
+                            balloonPtr->SetTargetPosition(m_ClickedMonkey->GetPosition());
+                            balloonPtr->SetSpeed(20.0f);
+                            grabbedBalloons.push_back(std::make_pair(balloonPtr, rope_tail));
+                            m_Balloons.erase(m_Balloons.begin() + i);
+                            break;
+                        }
+                    }
+                }
+                else if (monkeyType == "SniperMonkey") {
+                    // random in x(-600 350) y(0/300)
+                    auto dropbox = std::make_shared<Dropbox>(glm::vec2(rand() % 950 - 600, rand() % 300));
+                    dropbox -> SetScale(glm::vec2(0.1, 0.1));
+                    m_drops.push_back(dropbox);
+                    m_Root.AddChild(dropbox);
+                }
+                else if (monkeyType == "MagicMonkey") {
+                    auto thebird = std::make_shared<TheBird>(m_ClickedMonkey->GetPosition(), glm::vec2(0.0, 0.0), m_ClickedMonkey->GetAttributes());
+                    m_Attacks.push_back(thebird);
+                    m_Root.AddChild(thebird);
                 }
             }
             else if (clickInformationBoard != 0 && clickInformationBoard != 1) {

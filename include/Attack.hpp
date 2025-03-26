@@ -26,6 +26,8 @@ public:
     virtual void Move();
     void LosePenetration();
     void SetRectangleCorners();
+    void SetScale(glm::vec2 scale);
+
 
     [[nodiscard]] glm::vec2 GetPosition() const { return m_Transform.translation; }
     [[nodiscard]] virtual bool IsAlive() { return m_Attributes -> GetPenetration() > 0;}
@@ -237,4 +239,70 @@ public:
     [[nodiscard]] bool IsAlive() override;
 private:
     int time = 600;
+};
+
+class Nuclear_bomb : public Attack {
+public:
+    explicit Nuclear_bomb(glm::vec2 position);
+    void Move() override;
+    [[nodiscard]] bool IsOut() override;
+    [[nodiscard]] bool IsAlive() override;
+    void RotationImage();
+private:
+    int time = 138;
+};
+
+class Rope : public Attack {
+public:
+    explicit Rope(glm::vec2 sourcePosition, glm::vec2 targetPosition, std::shared_ptr<Attributes> attributes);
+    [[nodiscard]] bool IsOut() override;
+    [[nodiscard]] bool IsAlive() override;
+private:
+    glm::vec2 m_SourcePosition;
+    glm::vec2 m_TargetPosition;
+    glm::vec2 m_GoalPosition;
+    int time = 1;
+};
+
+class Rope_tail : public Attack {
+public:
+    explicit Rope_tail(glm::vec2 sourcePosition, glm::vec2 targetPosition, std::shared_ptr<Attributes> attributes);
+    bool CheckAndReverse();
+    [[nodiscard]] bool IsOut() override;
+    [[nodiscard]] bool IsAlive() override;
+    [[nodiscard]] glm::vec2 GetSourcePosition();
+private:
+    glm::vec2 m_SourcePosition;
+    glm::vec2 m_GoalPosition;
+    float m_Length;
+    float m_Angle;
+    bool m_IsReturning = false;
+    bool m_IsFinished = false;
+}; 
+
+class Dropbox : public Attack {
+public:
+    explicit Dropbox(glm::vec2 position);
+    [[nodiscard]] bool IsOut() override;
+    [[nodiscard]] bool IsAlive() override;
+private:
+    int time = 120;
+};
+
+class TheBird : public Attack {
+public:
+    explicit TheBird(glm::vec2 centerPosition, glm::vec2 useless, std::shared_ptr<Attributes> attributes);
+    void Move() override;
+    [[nodiscard]] bool IsOut();
+    [[nodiscard]] bool IsAlive() ;  
+    void UpdatePosition();
+    void RotateImage();
+private:
+    int time = 1200;
+    glm::vec2 m_CenterPosition;
+    float m_Radius;
+    int max_Penetration;         // 设置最大穿透值为50
+    int renewPenetrationCd;       // 每5帧恢复一次穿透值
+    bool WillNotDisappear ; 
+    float m_CurrentAngle;
 };

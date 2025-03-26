@@ -27,6 +27,7 @@ public:
     void SetSpeed(float num);
     void SetRectangleCorners();
     void SetRotation();
+    void SetRotation(float angle);
     void SetDistance(float distance);
     void SetWidth(int width);
     void SetHeight(int height);
@@ -36,7 +37,9 @@ public:
     void Move();
     void SetType(Balloon::Type type);
     void AddProperty(int property);
+    void SetTargetPosition(const glm::vec2& targetPosition);
     virtual void Injured();
+    
 
 
 

@@ -37,6 +37,16 @@ void Balloon::Move() {
         SetRectangleCorners();
     }
 }
+void Balloon::SetTargetPosition(const glm::vec2& targetPosition) {
+    // glm::vec2 position = m_Coordinates[0];
+    // glm::vec2 origin_position = m_Transform.translation;
+    m_Coordinates.clear();
+    // SetPosition(position);
+    // m_Coordinates.push_back(position);
+    m_Coordinates.push_back(targetPosition);
+    // Move();
+    // SetPosition(origin_position);
+}
 
 void Balloon::SetMoney(int n) {
     m_Money = n;
@@ -70,6 +80,11 @@ void Balloon::SetRotation() {
         m_Radian = angle_rad;
         m_Transform.rotation = angle_rad;
     }
+}
+
+void Balloon::SetRotation(float angle) {
+    m_Radian = angle;
+    m_Transform.rotation = angle;
 }
 
 void Balloon::SetRectangleCorners(){

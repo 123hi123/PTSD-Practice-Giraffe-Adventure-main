@@ -344,17 +344,21 @@ void DartMonkey::UpdateLevel() {
             case 1:
                 SetRadius(GetRadius() *1.25);
                 UpdateRange();
+                break;
             case 2:
                 SetRadius(GetRadius() *1.25);
                 UpdateRange();
                 attributes -> AddProperty(2);
+                break;
             case 3:
                 SetCd(150);
                 ResetCount();
                 attributes -> SetPenetration(18);
+                break;
             case 4:
                 attributes -> AddProperty(1);
                 attributes -> AddProperty(3);
+                break;
         }
     }
     else {
@@ -362,9 +366,11 @@ void DartMonkey::UpdateLevel() {
             case 1:
                 attributes -> SetPenetration(2);
                 attributes -> SetPower(2);
+                break;
             case 2:
                 attributes -> SetPenetration(3);
                 attributes -> SetPower(3);
+                break;
         }
     }
 }
@@ -516,9 +522,11 @@ void NailMonkey::UpdateLevel() {
             case 1:
                 SetCd(60);
                 ResetCount();
+                break;
             case 2:
                 SetCd(30);
                 ResetCount();
+                break;
         }
     }
     else {
@@ -526,9 +534,11 @@ void NailMonkey::UpdateLevel() {
             case 1:
                 SetRadius(GetRadius() *1.25);
                 UpdateRange();
+                break;
             case 2:
                 SetRadius(GetRadius() *1.25);
                 UpdateRange();
+                break;
         }
     }
 }
@@ -575,13 +585,17 @@ void SniperMonkey::UpdateLevel() {
                 attributes -> SetPenetration(4);
                 attributes -> AddProperty(1);
                 attributes -> AddProperty(4);
+                break;
             case 2:
                 attributes -> SetPenetration(7);
+                break;
             case 3:
                 attributes -> SetPenetration(18);
                 attributes -> AddProperty(3);
+                break;
             case 4:
                 attributes -> AddDebuff({3, 10});
+                break;
         }
     }
     else {
@@ -589,12 +603,15 @@ void SniperMonkey::UpdateLevel() {
             case 1:
                 SetCd(90);
                 ResetCount();
+                break;
             case 2:
                 attributes -> AddProperty(2);
+                break;
             case 3:
                 attributes -> AddProperty(2);
                 SetCd(30);
                 ResetCount();
+                break;
         }
     }
 }
@@ -678,24 +695,30 @@ void BoomerangMonkey::UpdateLevel() {
         switch (level) {
             case 1:
                 attributes -> SetPenetration(7);
+                break;
             case 2:
                 attributes -> SetPower(3);
                 attributes -> SetSpeed(20);
                 SetCd(60);
                 ResetCount();
+                break;
             case 4:
                 attributes -> AddProperty(2);
+                break;
         }
     }
     else {
         switch (level) {
             case 1:
                 attributes -> AddProperty(4);
+                break;
             case 2:
                 attributes -> AddProperty(1);
+                break;
             case 3:
                 SetCd(40);
                 ResetCount();
+                break;
         }
     }
 }
@@ -754,8 +777,10 @@ void NinjaMonkey::UpdateLevel() {
                 ResetCount();
                 SetRadius(GetRadius()*1.5);
                 UpdateRange();
+                break;
             case 2:
                 attributes -> SetPenetration(4);
+                break;
         }
     }
     else {
@@ -927,7 +952,7 @@ SuperMonkey::SuperMonkey(glm::vec2 position) : Monkey(position){
     attributes -> SetPenetration(1);
     attributes -> SetPower(3);
     attributes -> SetSpeed(60);
-    SetSkillTime(200);
+    SetSkillTime(100);
     auto &informationBoard = GetInfortionBoard();
     informationBoard = std::make_shared<SuperMonkeyInformationBoard>();
 
