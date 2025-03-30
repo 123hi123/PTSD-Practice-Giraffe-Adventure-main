@@ -42,3 +42,9 @@ RockNinjaDebuff::RockNinjaDebuff(){
     SetZIndex(4);
 };
 
+Dizzylight::Dizzylight(){
+    SetImage(GA_RESOURCE_DIR"/Debuff/dizzylight.png");
+    SetVisible(false);
+    SetZIndex(4);
+};
+

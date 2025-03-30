@@ -83,8 +83,9 @@ private:
     std::shared_ptr<DebuffView> ice =  std::make_shared<Ice>();
     std::shared_ptr<DebuffView> rubber =  std::make_shared<Mucus>();
     std::shared_ptr<DebuffView> rock_ninja =  std::make_shared<RockNinjaDebuff>();
-    std::vector<int> m_Debuff = {0, 0, 0, 0, 0};
-    std::vector<float> debuff_slow = {0.5, 0, 0.2, 0, 0.5}; // 減速
+    std::shared_ptr<DebuffView> dizzylight =  std::make_shared<Dizzylight>(); // make debuff step1
+    std::vector<int> m_Debuff = {0, 0, 0, 0, 0, 0, 0};// make debuff step2
+    std::vector<float> debuff_slow = {0.5, 0, 0.2, 0, 0.5, -1, 0}; // make debuff step3
 };
 
 class RED : public Balloon {

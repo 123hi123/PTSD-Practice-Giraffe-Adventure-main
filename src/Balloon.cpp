@@ -184,6 +184,9 @@ int Balloon::IsAttackEffective(std::vector<int> properties, int power) {
             return 0;
         }
     }
+    if (GetType() == Balloon::Type::spaceship && std::binary_search(properties.begin(), properties.end(), 5)) {
+        return power*10;
+    }
     return power;
 }
 
@@ -201,11 +204,18 @@ void Balloon::GetDebuff(std::vector<std::vector<int>> debuff) {
         if (tmp[0] != 3 || GetType() == spaceship) {
             m_Debuff[tmp[0]] += tmp[1];
         }
+        if (tmp[0] == 5){
+            int random = rand() % 100;
+            if (random < 50) {
+                m_Debuff[tmp[0]] -= tmp[1];
+            }
+        }
     }
     if (m_Debuff[0] > 350) {
         m_Debuff[0] = 0;
         m_Debuff[1] = 100;
     }
+    
     
     if (m_Debuff[1] != 0 && !std::binary_search(m_Properties.begin(), m_Properties.end(), 1)) {
         m_Properties.push_back(1);
@@ -214,7 +224,7 @@ void Balloon::GetDebuff(std::vector<std::vector<int>> debuff) {
 }
 
 std::vector<std::shared_ptr<Util::GameObject>> Balloon::GetDebuffViews() {
-    return {snow, ice, rubber, rock_ninja};
+    return {snow, ice, rubber, rock_ninja, dizzylight};
 }
 
 float Balloon::UpdateDebuff() {
@@ -225,6 +235,7 @@ float Balloon::UpdateDebuff() {
             else if (i == 1) { ice -> Update(GetPosition(), true); }
             else if (i == 2) { rubber -> Update(GetPosition(), true); }
             else if (i == 4) { rock_ninja -> Update(GetPosition(), true); }
+            else if (i == 6) { dizzylight -> Update(GetPosition(), true); }
             slow *= debuff_slow[i];
             m_Debuff[i] -= 1;
             
@@ -237,6 +248,7 @@ float Balloon::UpdateDebuff() {
         else if (i == 1) { ice -> Update(GetPosition(), false); }
         else if (i == 2) { rubber -> Update(GetPosition(), false); }
         else if (i == 4) { rock_ninja -> Update(GetPosition(), false);}
+        else if (i == 6) { dizzylight -> Update(GetPosition(), false); }
     }
     return slow;
 };

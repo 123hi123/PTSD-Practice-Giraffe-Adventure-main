@@ -139,6 +139,7 @@ class Cannon : public Monkey {
 public:
       explicit Cannon(glm::vec2 position);
       [[nodiscard]] std::vector<std::shared_ptr<Attack>> ProduceAttack(glm::vec2 goalPosition) override;
+      void UpdateLevel() override;
 };
 
 
@@ -148,6 +149,7 @@ public:
       [[nodiscard]] std::vector<std::shared_ptr<Attack>> ProduceAttack(glm::vec2 goalPosition) override;
       [[nodiscard]] bool IsCollision(const std::shared_ptr<Balloon>& other) const override;
       glm::vec2 ProduceCoordinateByAngle(glm::vec2 position, float angle);
+      void UpdateLevel() override;
 private:
       int airplane_num = 1;
       std::vector<std::shared_ptr<Attack>> m_Airplanes;
@@ -158,6 +160,7 @@ public:
       explicit BuccaneerMonkey(glm::vec2 position);
       [[nodiscard]] std::vector<std::shared_ptr<Attack>> ProduceAttack(glm::vec2 goalPosition) override;
       [[nodiscard]] bool Placeable(std::vector<std::vector<std::vector<glm::vec2>>> Level_Placeable) override;
+      void UpdateLevel() override;
 };
 
 class SuperMonkey : public Monkey {

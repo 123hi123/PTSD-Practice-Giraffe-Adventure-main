@@ -760,9 +760,29 @@ std::vector<std::shared_ptr<Attack>> NinjaMonkey::ProduceAttack(glm::vec2 goalPo
                 attacks.push_back(attack);
             }
         }
+    }else if (upgradePath == 2 && level > 0) {
+        std::shared_ptr<Attack> attack = std::make_shared<NinjaShuriken>(GetPosition(), goalPosition, GetAttributes());
+        attacks.push_back(attack);
     }
-    std::shared_ptr<Attack> attack = std::make_shared<Shuriken>(GetPosition(), goalPosition, GetAttributes());
-    attacks.push_back(attack);
+    if (upgradePath ==2 && level==3){
+
+        //have posiblity to produce attack 
+        if (rand() % 100 < 30) {
+            auto newAttributes = std::make_shared<Attributes>(*GetAttributes());
+            newAttributes->SetPenetration(1);
+            newAttributes->SetPower(0);
+            newAttributes->SetSpeed(40);
+            newAttributes->AddDebuff({6, 100});
+            std::shared_ptr<Attack> attack1 = std::make_shared<Bomb>(GetPosition(), goalPosition, newAttributes);
+            attack1 -> SetImage(GA_RESOURCE_DIR"/Attack/lightbomb.png");
+            //change scale
+            attack1 -> SetScale(glm::vec2(1.5, 1.5));
+            attacks.push_back(attack1);
+            std::shared_ptr<Attack> attack2 = std::make_shared<Explosionlight>(GetPosition(), goalPosition, attack1, newAttributes);
+            attack2 -> SetVisible(false);
+            attacks.push_back(attack2);
+        }
+    }
     return attacks;
 }
 
@@ -784,6 +804,15 @@ void NinjaMonkey::UpdateLevel() {
         }
     }
     else {
+        switch (level) {
+            case 1:
+                attributes -> SetPenetration(20);
+                break;
+            case 2:
+                // attributes -> SetPenetration(40);
+                attributes -> AddDebuff({5, 100});
+                break;
+        }
     }
 }
 
@@ -809,6 +838,8 @@ Cannon::Cannon(glm::vec2 position) : Monkey(position){
 }
 
 std::vector<std::shared_ptr<Attack>> Cannon::ProduceAttack(glm::vec2 goalPosition) {
+    int level = GetLevel();
+    int upgradePath = GetUpgradePath();
     std::vector<std::shared_ptr<Attack>> remove_attacks;
     ResetCount();
     SetRotation(goalPosition);
@@ -818,9 +849,85 @@ std::vector<std::shared_ptr<Attack>> Cannon::ProduceAttack(glm::vec2 goalPositio
     std::shared_ptr<Attack> attack2 = std::make_shared<Explosion>(GetPosition(), goalPosition, attack1, GetAttributes());
     attack2 -> SetVisible(false);
     attacks.push_back(attack2);
+    if (upgradePath == 1){
+        switch (level) {
+            case 4:{
+
+            }
+            case 3:{
+                double shift = (rand() % 100) / 100.0 * (PI/6);  // 隨機偏移最多30度
+                for (int i = 0; i < 3; i++) {
+                    double theta = i * 2*PI / 3 + shift;  // 三等分圓，每個方向隨機偏移最多30度
+                    auto attributes = std::make_shared<Attributes>(*GetAttributes());
+                    attributes -> SetPower(1);
+                    attributes -> SetSpeed(20);
+                    double targetX = goalPosition.x + cos(theta) * 100; // 100單位距離，可調整
+                    double targetY = goalPosition.y + sin(theta) * 100;
+                    glm::vec2 targetPos = glm::vec2(targetX, targetY);
+                    std::shared_ptr<Attack> attack3 = std::make_shared<smallbomb>(goalPosition, targetPos, attack1, attributes);
+                    attack3 -> SetVisible(false);
+                    attack3 -> SetScale(glm::vec2(0.7, 0.7));
+                    attack3 -> SetTouchScale(glm::vec2(0.7, 0.7));
+                    attack3 -> SetPosition(goalPosition);
+                    attacks.push_back(attack3);
+                    
+                    std::shared_ptr<Attack> attack4 = std::make_shared<Explosion>(goalPosition, targetPos, attack3, attributes);
+                    attack4 -> SetTouchScale(glm::vec2(0.7, 0.7));
+                    attack4 -> SetImage(GA_RESOURCE_DIR"/Attack/Explosion_small.png");
+                    attack4 -> SetScale(glm::vec2(0.7, 0.7));
+                    attack4 -> SetPosition(goalPosition);
+                    attack4 -> SetVisible(false);
+                    attacks.push_back(attack4);
+                }
+                break;
+            }
+            case 2:{
+                for (int i = 0; i < 8; i++) {
+                    double theta = i * PI / 4;  // 八等分圓 (0, 45, 90, 135, 180, 225, 270, 315度)
+                    auto attributes = std::make_shared<Attributes>(*GetAttributes());
+                    attributes -> SetPower(1);
+                    attributes -> SetSpeed(30);
+                    // 計算八個方向的坐標點 (作為目標點)
+                    double targetX = goalPosition.x + cos(theta) * 100; // 100單位距離，可調整
+                    double targetY = goalPosition.y + sin(theta) * 100;
+                    glm::vec2 targetPos = glm::vec2(targetX, targetY);
+                    std::shared_ptr<Attack> attack3 = std::make_shared<Explosion_slice>(goalPosition, targetPos, attack1, attributes);
+                    attack3 -> SetVisible(false);
+                    attacks.push_back(attack3);
+                }
+            }
+            case 1:
+                // 第一級不需要額外攻擊
+                break;
+        }
+    }else{
+    }
     return attacks;
 }
 
+void Cannon::UpdateLevel() {
+    int level = GetLevel();
+    int upgradePath = GetUpgradePath();
+    auto attributes = GetAttributes();
+    if (upgradePath == 1) {
+        switch (level) {
+            case 1:
+                ResetCount();
+                SetRadius(GetRadius()*1.5);
+                UpdateRange();
+                break;
+            case 4:
+                attributes -> AddDebuff({6, 5});
+                break;
+        }
+    }else if (upgradePath == 2) {
+        switch (level) {
+            case 1:
+                SetCd(100);
+                break;
+        }
+    }
+}
 //########################################################################
 
 Airport::Airport(glm::vec2 position) : Monkey(position){
@@ -841,6 +948,20 @@ Airport::Airport(glm::vec2 position) : Monkey(position){
     UpdateRange();
     SetSize(glm::vec2(50.0f, 50.0f));
 }
+void Airport::UpdateLevel() {
+    int level = GetLevel();
+    int upgradePath = GetUpgradePath();
+    auto attributes = GetAttributes();
+    if (upgradePath == 1) {
+        switch (level) {
+            case 1:
+                SetCd(100);
+                break;
+        }
+    }   
+}
+
+
 
 std::vector<std::shared_ptr<Attack>> Airport::ProduceAttack(glm::vec2 goalPosition) {
     glm::vec2 position = GetPosition();
@@ -901,6 +1022,10 @@ BuccaneerMonkey::BuccaneerMonkey(glm::vec2 position) : Monkey(position){
     SetCd(120);
     SetRadius(200);
     UpdateRange();
+}
+
+void BuccaneerMonkey::UpdateLevel(){
+    return ;
 }
 
 bool BuccaneerMonkey::Placeable(std::vector<std::vector<std::vector<glm::vec2>>> Level_Placeable){

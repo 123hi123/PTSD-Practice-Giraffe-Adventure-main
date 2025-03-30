@@ -26,6 +26,11 @@ void Attack::SetImage(const std::string& ImagePath) {
     m_Drawable = std::make_shared<Util::Image>(m_ImagePath);
 }
 
+void Attack::SetTouchScale(glm::vec2 scale) {
+    m_Width = m_Width * scale.x;
+    m_Height = m_Height * scale.y;
+}
+
 void Attack::SetPenetration(int penetration) {
     m_Attributes -> SetPenetration(penetration);
 }
@@ -268,6 +273,129 @@ Explosion::Explosion(glm::vec2 position, glm::vec2 goal_position, std::shared_pt
 }
 
 [[nodiscard]] bool Explosion::IsAlive() {
+    if (m_Bomb -> IsAlive()) {
+        return false;
+    }
+    else {
+        SetSpeed(0);
+        SetVisible(true);
+        return true;
+    }
+}
+
+//###########################################################
+Explosion_slice::Explosion_slice(glm::vec2 position, glm::vec2 goal_position, std::shared_ptr<Attack> bomb, std::shared_ptr<Attributes> attributes)
+: Attack(position, goal_position, attributes) {
+    SetImage(GA_RESOURCE_DIR"/Attack/Explosion_slice.png");
+    m_Transform.scale = glm::vec2( 1.0, 1.0);
+    SetPosition(position);
+    m_Bomb = bomb;
+    SetWidth(20);
+    SetHeight(20);
+    SetRectangleCorners();
+}
+
+void Explosion_slice::Move() {
+    if (m_Bomb -> IsAlive() and !m_Bomb -> IsOut()) {
+        
+    }else{
+        SetVisible(true);
+        m_Transform.translation += GetUnitDirection() * GetSpeed();
+        SetRectangleCorners();
+    }
+}
+
+[[nodiscard]] bool Explosion_slice::IsOut() {
+    if (m_Bomb -> IsAlive() and !m_Bomb -> IsOut()) {
+        return false;
+    }
+    else {
+        if (existTime != 0) {
+            existTime --;
+            return false;
+        }
+        return true;
+    }
+}
+
+[[nodiscard]] bool Explosion_slice::IsAlive() {
+    if (m_Bomb -> IsAlive()) {
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
+//###########################################################
+
+smallbomb::smallbomb(glm::vec2 position, glm::vec2 goal_position, std::shared_ptr<Attack> bomb, std::shared_ptr<Attributes> attributes)
+: Attack(position, goal_position, attributes) {
+    SetImage(GA_RESOURCE_DIR"/Attack/Bomb.png");
+    SetWidth(20);
+    SetHeight(20);
+    SetRectangleCorners();
+    SetPenetration(1);
+    m_Bomb = bomb;
+}
+
+void smallbomb::Move() {
+    if (m_Bomb -> IsAlive() and !m_Bomb -> IsOut()) {
+        
+    }else{
+        SetVisible(true);
+        m_Transform.translation += GetUnitDirection() * GetSpeed();
+        SetRectangleCorners();
+    }
+}
+[[nodiscard]] bool smallbomb::IsOut() {
+    if (m_Bomb -> IsAlive() and !m_Bomb -> IsOut()) {
+        return false;
+    }
+    else {
+        if (existTime != 0) {
+            existTime --;
+        }
+        return !(existTime > 0 and GetPenetration() > 0);
+    }
+}
+
+[[nodiscard]] bool smallbomb::IsAlive() {
+    if (m_Bomb -> IsAlive()) {
+        return true;
+    }
+    else {
+        SetVisible(true);
+        return existTime > 0 and GetPenetration() > 0;
+    }
+}
+//###########################################################
+
+Explosionlight::Explosionlight(glm::vec2 position, glm::vec2 goal_position, std::shared_ptr<Attack> bomb, std::shared_ptr<Attributes> attributes)
+: Attack(position, goal_position, attributes) {
+    m_Transform.scale = glm::vec2( 2.0, 2.0);
+    m_Bomb = bomb;
+    SetWidth(120);
+    SetHeight(120);
+    SetRectangleCorners();
+}
+
+[[nodiscard]] bool Explosionlight::IsOut() {
+    if (m_Bomb -> IsAlive() and !m_Bomb -> IsOut()) {
+        return false;
+    }
+    else {
+        if (existTime != 0) {
+            SetImage(GA_RESOURCE_DIR"/Attack/Explosionlight_" + std::to_string(existTime) + ".png");
+
+            existTime --;
+            return false;
+        }
+        return true;
+    }
+}
+
+[[nodiscard]] bool Explosionlight::IsAlive() {
     if (m_Bomb -> IsAlive()) {
         return false;
     }
@@ -836,7 +964,7 @@ Dropbox::Dropbox(glm::vec2 position)
     
     time -= 1;  // 倒计时减少
     return false;
-}   
+}
 
 [[nodiscard]] bool Dropbox::IsAlive() {
     return false;
@@ -923,4 +1051,155 @@ void TheBird::UpdatePosition() {
 void TheBird::RotateImage() {
     // 让图像随着移动旋转
     m_Transform.rotation = m_CurrentAngle + PI/2;
+}
+
+//###########################################################
+
+NinjaShuriken::NinjaShuriken(glm::vec2 position, glm::vec2 goal_position, std::shared_ptr<Attributes> attributes)
+: Attack(position, goal_position, attributes) {
+    SetImage(GA_RESOURCE_DIR"/Attack/Shuriken.png");
+    m_Transform.scale = glm::vec2(1.2, 1.2);
+    m_SourcePosition = position;
+    m_GoalPosition = goal_position;
+    
+    // 計算目標方向向量並標準化
+    glm::vec2 direction = goal_position - position;
+    glm::vec2 unit_direction = glm::normalize(direction);
+    
+    // 計算延伸位置 (目標位置再向前 50 單位)
+    m_ExtendedPosition = goal_position + unit_direction * 50.0f;
+    
+    // 設定碰撞區域
+    SetWidth(25);
+    SetHeight(25);
+    SetRectangleCorners();
+}
+
+void NinjaShuriken::Move() {
+    RotationImage();
+    
+    switch (m_CurrentState) {
+        case State::MOVING_TO_TARGET: {
+            // 正常移動到目標位置
+            glm::vec2 UnitDirection = GetUnitDirection();
+            m_Transform.translation += UnitDirection * GetSpeed();
+            
+            // 檢查是否到達目標位置
+            float distance = glm::length(m_GoalPosition - m_Transform.translation);
+            if (distance <= GetSpeed()) {
+                // 到達目標位置，切換到下一階段
+                m_CurrentState = State::MOVING_FORWARD;
+                // 設定新的方向：向前延伸
+                SetUnitDirection(m_ExtendedPosition);
+                // 初始化軌跡參數
+                m_CurrentTime = 0.0f;
+                m_OrbitRadius = 80.0f; // 增加初始軌道半徑，從50增加到80
+                m_RotationAngle = 0.0f;
+            }
+            break;
+        }
+        
+        case State::MOVING_FORWARD: {
+            // 朝延伸位置移動
+            glm::vec2 UnitDirection = GetUnitDirection();
+            m_Transform.translation += UnitDirection * GetSpeed();
+            
+            // 檢查是否到達延伸位置
+            float distance = glm::length(m_ExtendedPosition - m_Transform.translation);
+            if (distance <= GetSpeed()) {
+                // 到達延伸位置，切換到八字形運動階段
+                m_CurrentState = State::RANDOM_MOVEMENT;
+                m_Transform.translation = m_ExtendedPosition; // 確保精確位置
+            }
+            break;
+        }
+        
+        case State::RANDOM_MOVEMENT: {
+            // 執行八字形運動
+            if (m_RandomMovementTime > 0) {
+                // 更新時間和旋轉角度
+                m_CurrentTime += 0.05f; // 增加時間步進，加快八字形運動速度
+                m_RotationAngle += 0.01f; // 增加旋轉速度，從0.006增加到0.01
+                
+                // 基本八字形參數
+                float A = m_OrbitRadius * 1.0f; // 增加X軸振幅，從0.8增加到1.0
+                float B = m_OrbitRadius * 0.6f; // 增加Y軸振幅，從0.4增加到0.6
+                
+                // 計算基本八字形坐標
+                float baseX = A * sin(m_CurrentTime);
+                float baseY = B * sin(2 * m_CurrentTime);
+                
+                // 應用旋轉效果
+                float rotatedX = baseX * cos(m_RotationAngle) - baseY * sin(m_RotationAngle);
+                float rotatedY = baseX * sin(m_RotationAngle) + baseY * cos(m_RotationAngle);
+                
+                // 設置新位置（相對於目標位置）
+                m_Transform.translation.x = m_GoalPosition.x + rotatedX;
+                m_Transform.translation.y = m_GoalPosition.y + rotatedY;
+                
+                // 根據手裏劍當前運動方向設置旋轉
+                float dx = rotatedX;
+                float dy = rotatedY;
+                if (dx != 0 || dy != 0) {
+                    double angle_rad = atan2(dy, dx);
+                    m_Transform.rotation = angle_rad;
+                }
+                
+                // 緩慢減小軌道半徑，使手裏劍逐漸接近中心
+                if (m_RandomMovementTime < 100) {
+                    m_OrbitRadius = m_OrbitRadius * 0.99f; // 減緩縮小速率，從0.995改為0.99
+                }
+                
+                m_RandomMovementTime--;
+            } else {
+                // 時間結束，使手裏劍消失
+                m_Transform.translation = glm::vec2(-650, -370);
+            }
+            break;
+        }
+    }
+    
+    SetRectangleCorners();
+}
+
+void NinjaShuriken::RotationImage() {
+    float theta = 2*PI - rotation*PI/2; // 將旋轉速度從PI/3增加到PI/2
+    m_Transform.rotation = theta;
+    rotation += 2; // 增加每幀旋轉的量，從1增加到2
+    rotation %= 6;
+}
+
+void NinjaShuriken::CalculateNewDirection() {
+    // 生成隨機角度變化 (-PI/4 到 PI/4)
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dist(-PI/4, PI/4);
+    float angle_change = dist(gen);
+    
+    // 計算新角度，加入弧形效果
+    m_CurrentAngle += angle_change;
+    
+    // 基於新角度計算單位方向向量
+    glm::vec2 new_direction(cos(m_CurrentAngle), sin(m_CurrentAngle));
+    RenewUnitDirection(new_direction);
+}
+
+[[nodiscard]] bool NinjaShuriken::IsOut() {
+    // 檢查是否完成所有階段的運動
+    if (m_CurrentState == State::RANDOM_MOVEMENT && m_RandomMovementTime <= 0) {
+        return true;
+    }
+    
+    // 檢查是否超出螢幕邊界
+    float x = m_Transform.translation.x;
+    float y = m_Transform.translation.y;
+    return x < -640 || x > 640 || y < -360 || y > 360;
+}
+
+[[nodiscard]] bool NinjaShuriken::IsAlive() {
+    if (GetPenetration() == 0 && WillNotDisappear){
+        WillNotDisappear = false;
+        return true;
+    }
+    return GetPenetration() > 0;
 }

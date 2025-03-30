@@ -40,4 +40,9 @@ public:
     explicit RockNinjaDebuff();
 };
 
+class Dizzylight : public DebuffView {
+public:
+    explicit Dizzylight();
+};
+
 #endif //DEBUFFVIEW_HPP

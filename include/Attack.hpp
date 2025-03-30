@@ -27,6 +27,7 @@ public:
     void LosePenetration();
     void SetRectangleCorners();
     void SetScale(glm::vec2 scale);
+    void SetTouchScale(glm::vec2 scale);
 
 
     [[nodiscard]] glm::vec2 GetPosition() const { return m_Transform.translation; }
@@ -108,6 +109,26 @@ private:
     std::shared_ptr<Attack> m_Bomb;
 };
 
+class Explosion_slice : public Attack {
+public:
+    explicit Explosion_slice(glm::vec2 position, glm::vec2 goal_position, std::shared_ptr<Attack> bomb, std::shared_ptr<Attributes> attributes);
+    void Move() override;
+    [[nodiscard]] bool IsOut() override;
+    [[nodiscard]] bool IsAlive() override;
+private:
+    std::shared_ptr<Attack> m_Bomb;
+    int existTime = 3;
+};
+
+class Explosionlight : public Attack {
+public:
+    explicit Explosionlight(glm::vec2 position, glm::vec2 goal_position, std::shared_ptr<Attack> bomb, std::shared_ptr<Attributes> attributes);
+    [[nodiscard]] bool IsOut() override;
+    [[nodiscard]] bool IsAlive() override;
+private:
+    int existTime = 3;
+    std::shared_ptr<Attack> m_Bomb;
+};
 class Airplane : public Attack {
 public:
     explicit Airplane(glm::vec2 position, glm::vec2 goal_position, std::shared_ptr<Attributes> attributes);
@@ -252,6 +273,38 @@ private:
     int time = 138;
 };
 
+class NinjaShuriken : public Attack {
+public:
+    explicit NinjaShuriken(glm::vec2 position, glm::vec2 goal_position, std::shared_ptr<Attributes> attributes);
+    void Move() override;
+    [[nodiscard]] bool IsOut() override;
+    [[nodiscard]] bool IsAlive() override;
+    void RotationImage();
+    void CalculateNewDirection();
+private:
+    enum class State {
+        MOVING_TO_TARGET,    // 移動到目標點
+        MOVING_FORWARD,      // 向前移動 50 單位
+        RANDOM_MOVEMENT      // 隨機八方向移動
+    };
+    
+    State m_CurrentState = State::MOVING_TO_TARGET;
+    int rotation = 0;
+    int m_RandomMovementTime = 600;  // 將隨機移動的持續時間從300增加到600
+    float m_CurrentAngle = 0.0f;     // 當前運動角度
+    int m_DirectionChangeCount = 0;  // 方向變更計數
+    
+    // 八字形運動參數
+    float m_CurrentTime = 0.0f;      // 參數化時間
+    float m_OrbitRadius = 50.0f;     // 軌道半徑
+    float m_RotationAngle = 0.0f;    // 整體旋轉角度
+    
+    glm::vec2 m_SourcePosition;      // 起始位置
+    glm::vec2 m_GoalPosition;        // 目標位置
+    glm::vec2 m_ExtendedPosition;    // 延伸位置
+    bool WillNotDisappear = true;
+};
+
 class Rope : public Attack {
 public:
     explicit Rope(glm::vec2 sourcePosition, glm::vec2 targetPosition, std::shared_ptr<Attributes> attributes);
@@ -305,4 +358,15 @@ private:
     int renewPenetrationCd;       // 每5帧恢复一次穿透值
     bool WillNotDisappear ; 
     float m_CurrentAngle;
+};
+
+class smallbomb : public Attack {
+public:
+    explicit smallbomb(glm::vec2 position, glm::vec2 goal_position, std::shared_ptr<Attack> bomb, std::shared_ptr<Attributes> attributes);
+    void Move() override;
+    [[nodiscard]] bool IsOut() override;
+    [[nodiscard]] bool IsAlive() override;
+private:
+    std::shared_ptr<Attack> m_Bomb; 
+    int existTime = 3;
 };
