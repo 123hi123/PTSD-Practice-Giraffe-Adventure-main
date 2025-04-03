@@ -3,6 +3,11 @@
 #include <random>
 #include "Util/Logger.hpp"
 #define PI 3.14159265358979323846
+Attack::Attack()
+{
+    m_Attributes = std::make_shared<Attributes>();
+}
+
 Attack::Attack(glm::vec2 position)
 {
     m_Attributes = std::make_shared<Attributes>();
@@ -1202,4 +1207,111 @@ void NinjaShuriken::CalculateNewDirection() {
         return true;
     }
     return GetPenetration() > 0;
+}
+
+//###########################################################
+Icetogether::Icetogether(std::shared_ptr<Balloon> balloon)
+: Attack() {
+    SetImage(GA_RESOURCE_DIR"/Attack/Icetogether.png");
+    m_Transform.scale = glm::vec2( 1.0, 1.0);
+    SetVisible(false);
+    m_Balloon = balloon;
+    SetWidth(120);
+    SetHeight(120);
+    SetRectangleCorners();
+    GetAttributes() -> AddDebuff({1,10});
+}
+
+void Icetogether::Move() {
+    SetPosition(m_Balloon -> GetPosition());
+    SetRectangleCorners();
+}
+
+[[nodiscard]] bool Icetogether::IsOut() {
+    if (m_Balloon->ShowDebuff(1) ==0) {
+        return false;
+    }
+    else if (existTime == 0 && m_Balloon -> ShowDebuff(1) > 0) {
+        SetVisible(true);
+        existTime = 1;
+        return false;
+    }
+    if (existTime > 0) { // 神奇作法 如果 EX>1 那麼表示 攻擊顯示所以要消失
+        return true;
+    } 
+    return false;
+}
+
+[[nodiscard]] bool Icetogether::IsAlive() {
+    if (existTime == 0) {
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
+//###########################################################
+Iceburstsliced::Iceburstsliced(std::shared_ptr<Balloon> balloon)
+: Attack() {
+    SetImage(GA_RESOURCE_DIR"/Attack/iceburstslice.png");
+    m_Transform.scale = glm::vec2( 1.0, 1.0);
+    SetVisible(false);
+    m_Balloon = balloon;
+    SetWidth(30);
+    SetHeight(10);
+    SetRectangleCorners();
+    GetAttributes() -> SetPower(1);
+    GetAttributes() -> SetSpeed(20);
+}
+
+void Iceburstsliced::Move() {
+    if (m_Balloon->IsAlive()) {
+        SetPosition(m_Balloon -> GetPosition());
+        SetRectangleCorners();
+    }
+    else {
+        // 假設我們有一個角度值 (以度為單位)，代表冰爆碎片的移動方向
+        // 將角度轉換為弧度
+        float radians = m_angle * (M_PI / 180.0f);
+        
+        // 根據角度計算單位向量
+        glm::vec2 direction = glm::vec2(cos(radians), sin(radians));
+        m_Transform.rotation = radians;
+        // 使用方向向量和速度更新位置
+        m_Transform.translation += direction * GetSpeed();
+        SetRectangleCorners();
+    }
+    
+}
+void Iceburstsliced::SetAngle(float angle) {
+    m_angle = angle;
+}
+
+[[nodiscard]] bool Iceburstsliced::IsOut() {
+    if (m_Balloon->IsAlive()) {
+        return false;
+    }
+    else if (existTime == 0 && m_Balloon->ShowDebuff(7) > 0) {
+        SetVisible(true);
+        existTime = 10;
+        return false;
+    }
+    if (existTime > 0) {
+        existTime --;
+        if (existTime == 0) {
+            return true;
+        }
+        return false;
+    } 
+    return !m_Balloon->IsAlive();
+}
+
+[[nodiscard]] bool Iceburstsliced::IsAlive() {
+    if (existTime == 0) {
+        return false;
+    }
+    else {
+        return existTime > 0;
+    }
 }

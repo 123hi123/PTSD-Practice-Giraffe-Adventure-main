@@ -7,9 +7,11 @@
 #include "Util/Animation.hpp"
 #include "Util/GameObject.hpp"
 #include "Attributes.hpp"
+#include "Balloon.hpp"
 
 class Attack : public Util::GameObject {
 public:
+    explicit Attack();
     explicit Attack(glm::vec2 position, glm::vec2 goal_position, std::shared_ptr<Attributes> attributes);
     explicit Attack(glm::vec2 position);
     void SetPosition(const glm::vec2& Position);
@@ -107,6 +109,30 @@ public:
 private:
     int existTime = 2;
     std::shared_ptr<Attack> m_Bomb;
+};
+
+class Icetogether : public Attack {
+public:
+    explicit Icetogether(std::shared_ptr<Balloon> balloon);
+    void Move() override;
+    [[nodiscard]] bool IsOut() override;
+    [[nodiscard]] bool IsAlive() override;
+private:
+    std::shared_ptr<Balloon> m_Balloon;
+    int existTime = 0;
+};
+
+class Iceburstsliced : public Attack {
+public:
+    explicit Iceburstsliced(std::shared_ptr<Balloon> balloon);
+    void Move() override;
+    [[nodiscard]] bool IsOut() override;
+    [[nodiscard]] bool IsAlive() override;
+    void SetAngle(float angle);
+private:
+    std::shared_ptr<Balloon> m_Balloon;
+    float m_angle;
+    int existTime = 0;
 };
 
 class Explosion_slice : public Attack {

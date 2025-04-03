@@ -61,6 +61,16 @@ void App::Reset() {
             }
             m_Attacks = {};
         }
+        if (!m_Balloons.empty()) {
+            for (auto& balloonPtr : m_Balloons) {
+                std::vector<std::shared_ptr<Util::GameObject>> debuffView = balloonPtr -> GetDebuffViews();
+                for (auto& debuffPtr : debuffView) {
+                    m_Root.RemoveChild(debuffPtr);
+                }
+                m_Root.RemoveChild(balloonPtr);
+            }
+            m_Balloons = {};
+        }
 
         for (auto& objectPtr : m_DragButtons) {
             m_Root.RemoveChild(objectPtr);

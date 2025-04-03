@@ -901,6 +901,33 @@ std::vector<std::shared_ptr<Attack>> Cannon::ProduceAttack(glm::vec2 goalPositio
                 break;
         }
     }else{
+        switch (level) {
+            case 4:
+                
+            case 3:
+                attack1 -> SetImage(GA_RESOURCE_DIR"/Attack/bombv2.png");
+                attack1 -> SetPower(attack1 -> GetPower()*5);
+                attack1 -> SetScale(glm::vec2(2, 2));
+                attack2 -> SetScale(glm::vec2(2, 2));
+                attack1 -> SetTouchScale(glm::vec2(2, 2));
+                attack2 -> SetTouchScale(glm::vec2(2, 2));
+                break;
+                
+            case 2:
+                attack1 -> SetImage(GA_RESOURCE_DIR"/Attack/bombv1.png");
+                attack1 -> SetPower(attack1 -> GetPower()*2);
+                attack1 -> SetScale(glm::vec2(2, 2));
+                attack2 -> SetScale(glm::vec2(2, 2));
+                attack1 -> SetTouchScale(glm::vec2(2, 2));
+                attack2 -> SetTouchScale(glm::vec2(2, 2));
+                break;
+            case 1:
+                attack1 -> SetScale(glm::vec2(3, 3));
+                attack2 -> SetScale(glm::vec2(3, 3));
+                attack1 -> SetTouchScale(glm::vec2(3, 3));
+                attack2 -> SetTouchScale(glm::vec2(3, 3));
+                break;
+        }
     }
     return attacks;
 }
@@ -922,8 +949,15 @@ void Cannon::UpdateLevel() {
         }
     }else if (upgradePath == 2) {
         switch (level) {
-            case 1:
-                SetCd(100);
+            case 4:
+                break;
+            case 3:
+                LOG_DEBUG("add property 5============================");
+                attributes -> AddProperty(5);//10 mutiple damage
+                break;
+            case 2:
+                SetRadius(GetRadius()*1.5);
+                UpdateRange();
                 break;
         }
     }
@@ -1126,13 +1160,13 @@ IceMonkey::IceMonkey(glm::vec2 position) : Monkey(position){
     attributes -> SetPenetration(0);
     attributes -> SetPower(0);
     attributes -> SetSpeed(0);
-    attributes -> AddDebuff({0, 2});
+    attributes -> AddDebuff({0, 5});
 
     auto &informationBoard = GetInfortionBoard();
     informationBoard = std::make_shared<IceMonkeyInformationBoard>();
 
     SetCost(380);
-    SetCd(1);
+    SetCd(4);
     SetRadius(120);
     UpdateRange();
 }
@@ -1144,7 +1178,64 @@ std::vector<std::shared_ptr<Attack>> IceMonkey::ProduceAttack(glm::vec2 goalPosi
 
     std::shared_ptr<Attack> attack = std::make_shared<Blizzard>(GetPosition(), goalPosition, GetAttributes(), GetRadius());
     attacks.push_back(attack);
+    int level = GetLevel();
+    int upgradePath = GetUpgradePath();
+    if (upgradePath == 1) { 
+        switch (level) {
+            case 4:
+            case 3:
+                attack -> SetScale(glm::vec2(1.3, 1.3));
+                attack -> SetTouchScale(glm::vec2(1.3, 1.3));
+            case 2:{
+                int random = rand() % 100;
+                if (random < 20) {
+                    attack -> SetPower(1);
+                    attack -> SetImage(GA_RESOURCE_DIR"/Attack/Blizzarddamage.png");
+                }
+            }
+            case 1:
+                attack -> SetScale(glm::vec2(1.5, 1.5));
+                attack -> SetTouchScale(glm::vec2(1.5, 1.5));
+                break;
+        }
+    }
     return attacks;
+}
+void IceMonkey::UpdateLevel(){
+    int level = GetLevel();
+    int upgradePath = GetUpgradePath();
+    auto attributes = GetAttributes();
+    if (upgradePath == 1) {
+        switch (level) {
+            case 1:
+                SetRadius(GetRadius()*1.5);
+                UpdateRange();
+                attributes -> AddDebuff({0, 2});
+                break;
+            case 3:
+                SetRadius(GetRadius()*1.3);
+                UpdateRange();
+                attributes -> AddDebuff({0, 3});
+            case 4:
+                attributes -> AddDebuff({0, 3});
+                break;
+        }
+    }
+    else if (upgradePath == 2) {
+        switch (level) {
+            case 1:
+                attributes -> AddDebuff({9, 1});
+                break;
+            case 2:
+                attributes -> AddDebuff({10, 1000});
+                break;
+            case 3:
+                attributes -> AddDebuff({7, 5});
+                break;
+            case 4:
+                break;
+        }
+    }
 }
 
 //########################################################################

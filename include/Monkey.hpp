@@ -176,6 +176,7 @@ private:
 class IceMonkey : public Monkey {
 public:
       explicit IceMonkey(glm::vec2 position);
+      void UpdateLevel() override;
       [[nodiscard]] std::vector<std::shared_ptr<Attack>> ProduceAttack(glm::vec2 goalPosition) override;
 };
 

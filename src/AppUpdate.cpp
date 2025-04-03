@@ -11,9 +11,9 @@ int count = 20;
 bool blocked = false;
 int block_time = 0;
 int nuclear_bomb_time = 0;
-
 std::vector<std::pair<std::shared_ptr<Balloon>, std::shared_ptr<Rope_tail>>> grabbedBalloons; // 存儲所有正在被拉動的氣球
-
+std::vector<std::shared_ptr<Balloon>> icetogethers;
+std::vector<std::shared_ptr<Balloon>> icebursts;
 std::vector<std::shared_ptr<Balloon>> new_balloons;
 std::vector<std::shared_ptr<Balloon>> remove_balloons;
 std::vector<std::shared_ptr<Attack>> remove_attacks;
@@ -98,6 +98,58 @@ void App::Update() {
         }
     }
     else if(!Win_Board -> GetVisible() && !Lose_Board -> GetVisible()) {
+        // for ice monkey
+        for (auto& balloonPtr : m_Balloons) { //進入判斷之前，先確定氣球有沒有活着？ 死了，就去掉他的 debuff
+            if (!balloonPtr -> IsAlive()) {
+                balloonPtr -> ClearDebuff();
+            }
+        }
+        for (auto& monkeyPtr : m_Monkeys) {
+            int status;
+            std::string monkeyType = abi::__cxa_demangle(typeid(*monkeyPtr).name(), 0, 0, &status);
+            if (monkeyType == "IceMonkey") {
+                if (monkeyPtr->GetLevel() >= 4 && monkeyPtr->GetUpgradePath() == 1) {
+                    for (auto& balloonPtr : m_Balloons) {
+                        if (monkeyPtr->IsCollision(balloonPtr) && !std::any_of(icetogethers.begin(), icetogethers.end(), 
+                            [balloonPtr](const std::shared_ptr<Balloon>& ptr) { 
+                            return ptr == balloonPtr; // 比較是否為同一個氣球
+                        })) 
+                        {
+                            auto attack1 = std::make_shared<Icetogether>(balloonPtr);
+                            m_Attacks.push_back(attack1);
+                            m_Root.AddChild(attack1);
+                            icetogethers.push_back(balloonPtr);
+                        }
+                    }
+                }
+                else if (monkeyPtr->GetLevel() >= 3 && monkeyPtr->GetUpgradePath() == 2 ) {
+
+                    for (auto& balloonPtr : m_Balloons) {
+                        if (monkeyPtr->IsCollision(balloonPtr) && !std::any_of(icebursts.begin(), icebursts.end(), 
+                            [balloonPtr](const std::shared_ptr<Balloon>& ptr) { 
+                            return ptr == balloonPtr; // 比較是否為同一個氣球
+                        })) 
+                        {
+                            int num_fragments = rand() % 3 + 3; // 隨機產生3到6個碎片
+                            float angle_step = 360.0f / num_fragments; // 均分360度
+                            
+                            for (int i = 0; i < num_fragments; i++) {
+                                float current_angle = i * angle_step; // 計算當前碎片的角度
+                                auto attack1 = std::make_shared<Iceburstsliced>(
+                                    balloonPtr
+                                );
+                                attack1 -> SetAngle(current_angle);
+                                attack1 -> SetScale(glm::vec2(2, 2));
+                                attack1 -> SetTouchScale(glm::vec2(2, 2));
+                                m_Attacks.push_back(attack1);
+                                m_Root.AddChild(attack1);
+                            }
+                            icebursts.push_back(balloonPtr);
+                        }
+                    }
+                }
+            }
+        }
         remove_balloons = {};
         // for dropbox
         std::vector<std::shared_ptr<Attack>> remove_drops;
@@ -301,8 +353,14 @@ void App::Update() {
                 m_Root.RemoveChild(attackPtr);
             }
             if (!balloonPtr -> IsAlive()) {
+                // balloonPtr -> ClearDebuff(); // 清除氣球身上的debuff
                 std::vector<std::shared_ptr<Balloon>> bs = balloonPtr -> Burst();
                 new_balloons.insert(new_balloons.end(), bs.begin(), bs.end());
+                if (balloonPtr -> ShowDebuff(10) > 0 && ( balloonPtr -> ShowDebuff(0) >0 || balloonPtr -> ShowDebuff(1) > 0)) {
+                    for (auto& b : bs) {
+                        b -> GetDebuff({{0,100}});
+                    }
+                }
                 remove_balloons.push_back(balloonPtr);
                 m_Counters[1] -> AddValue(balloonPtr -> GetMoney());
             }
