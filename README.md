@@ -1,3 +1,6 @@
+# bug possible
+- the ice monkey sometime cant 冰凍氣球
+
 # rule
 ## 地圖
 第一層是不可以放置的 陸地 (所以水的部分要關掉)
@@ -14,11 +17,13 @@ fin
 - canon
 - 迴力鏢
 - 狙擊
-unfin
-- magic
-- airplan
-- super
-- 海盜
 - 上漆
+- 海盜
+- airplan
+- magic
+unfin
+- super
+
+
 
 

@@ -123,6 +123,37 @@ Dart::Dart(glm::vec2 position, glm::vec2 goal_position, std::shared_ptr<Attribut
     SetHeight(10);
     SetRectangleCorners();
 }
+// #########################################################    
+Chasenormal::Chasenormal(glm::vec2 position, glm::vec2 goal_position, glm::vec2 chase_position, std::shared_ptr<Attributes> attributes)
+: Attack(position, goal_position, attributes){
+    m_ChasePosition = chase_position;
+    SetImage(GA_RESOURCE_DIR"/Attack/Dart.png");
+    SetScale(glm::vec2(2, 2));
+
+    SetWidth(20);
+    SetHeight(10);
+    SetRectangleCorners();
+}
+
+void Chasenormal::Move(){
+    time += 1;
+    if (time == 10) {
+        SetUnitDirection(m_ChasePosition);
+        SetRotation(m_ChasePosition);
+    }    
+    m_Transform.translation += GetUnitDirection() * GetAttributes() -> GetSpeed();
+    
+    SetRectangleCorners();
+}
+
+bool Chasenormal::IsOut() {
+    if (time > 20) {
+        float x = m_Transform.translation.x;
+        float y = m_Transform.translation.y;
+        return x < -640 || x > 640 || y < -360 || y > 360;
+    }
+    return false;
+}
 
 // #########################################################
 
@@ -287,7 +318,105 @@ Explosion::Explosion(glm::vec2 position, glm::vec2 goal_position, std::shared_pt
         return true;
     }
 }
+//###########################################################
+Explosionnew::Explosionnew(std::shared_ptr<Attack> bomb)
+: Attack() {
+    SetImage(GA_RESOURCE_DIR"/Attack/Explosion.png");
+    m_Transform.scale = glm::vec2( 2.0, 2.0);
+    m_Bomb = bomb;
+    SetWidth(120);
+    SetHeight(120);
+    SetPower(1);
+    SetRectangleCorners();
+}
+void Explosionnew::Move() {
+    SetPosition(m_Bomb -> GetPosition());
+}
 
+[[nodiscard]] bool Explosionnew::IsOut() {
+    if (m_Bomb -> IsAlive() and !m_Bomb -> IsOut()) {
+        return false;
+    }
+    else {
+        if (existTime != 0) {
+            existTime --;
+            return false;
+        }
+        return true;
+    }
+}
+
+[[nodiscard]] bool Explosionnew::IsAlive() {
+    if (m_Bomb -> IsAlive()) {
+        return false;
+    }
+    else {
+        SetSpeed(0);
+        SetVisible(true);
+        return true;
+    }
+}
+// #########################################################
+lightExplosion::lightExplosion(std::shared_ptr<Attack> bomb)
+: Attack() {
+    SetImage(GA_RESOURCE_DIR"/Attack/lightexplosion.png");
+    m_Transform.scale = glm::vec2( 1.0, 1.0);
+    m_Bomb = bomb;
+    SetWidth(100);
+    SetHeight(100);
+    SetPower(1);
+    SetRectangleCorners();
+}
+void lightExplosion::Move() {
+    SetPosition(m_Bomb -> GetPosition());
+}
+
+[[nodiscard]] bool lightExplosion::IsOut() {
+    if (m_Bomb -> IsAlive() and !m_Bomb -> IsOut()) {
+        return false;
+    }
+    else {
+        if (existTime != 0) {
+            // 隨著 existTime 逐步放大到五倍
+            float scale = 1.0f + 4.0f * (1.0f - static_cast<float>(existTime) / 100.0f);
+            SetScale(glm::vec2(scale, scale));
+            SetTouchScale(glm::vec2(scale, scale));
+            existTime--;
+            return false;
+        }
+        return true;
+    }
+}
+
+[[nodiscard]] bool lightExplosion::IsAlive() {
+    if (m_Bomb -> IsAlive()) {
+        return false;
+    }
+    else {
+        SetSpeed(0);
+        SetVisible(true);
+        return true;
+    }
+}
+// #########################################################
+BombPiapple::BombPiapple(glm::vec2 position)
+: Attack(position) {
+    SetImage(GA_RESOURCE_DIR"/Attack/pa.png");
+}
+bool BombPiapple::IsOut(){
+    time -= 1;
+    if (time == 120) {
+        SetImage(GA_RESOURCE_DIR"/Attack/pa1.png");
+    }
+    if (time == 60) {
+        SetImage(GA_RESOURCE_DIR"/Attack/pa2.png");
+    }
+    
+    return time<0;
+}
+bool BombPiapple::IsAlive(){
+    return time>0;
+}
 //###########################################################
 Explosion_slice::Explosion_slice(glm::vec2 position, glm::vec2 goal_position, std::shared_ptr<Attack> bomb, std::shared_ptr<Attributes> attributes)
 : Attack(position, goal_position, attributes) {
@@ -1314,4 +1443,66 @@ void Iceburstsliced::SetAngle(float angle) {
     else {
         return existTime > 0;
     }
+}
+
+
+
+//###########################################################
+// New full implementation of wind attack
+WindAttack::WindAttack(glm::vec2 position, glm::vec2 goal_position, std::shared_ptr<Attributes> attributes)
+: Attack(position, goal_position, attributes) {
+    SetImage(GA_RESOURCE_DIR"/Attack/wind.png");
+    m_Transform.scale = glm::vec2(1, 1);
+    m_GoalPosition = goal_position;
+    m_HasReachedGoal = false;
+    m_StayDuration = 100; // Stay for 100 frames
+    GetAttributes() -> AddDebuff({15,2});
+    
+    SetWidth(60);
+    SetHeight(60);
+    
+    // 重置旋轉，確保圖片方向保持不變
+    m_Transform.rotation = 0;
+    
+    SetRectangleCorners();
+}
+
+void WindAttack::Move() {
+    if (!m_HasReachedGoal) {
+        // Moving to destination
+        glm::vec2 direction = m_GoalPosition - m_Transform.translation;
+        float distance = glm::length(direction);
+        
+        if (distance <= GetSpeed()) {
+            // Reached the destination
+            m_Transform.translation = m_GoalPosition;
+            m_HasReachedGoal = true;
+        } else {
+            // Continue moving toward the destination
+            m_Transform.translation += GetUnitDirection() * GetSpeed();
+        }
+    } else {
+        // Staying at destination
+        if (m_StayDuration > 0) {
+            m_StayDuration--;
+            
+            // Pulsing effect (optional)
+            float pulse = 1.0f + 0.1f * sin(m_StayDuration * 0.1f);
+            m_Transform.scale = glm::vec2(1.5f * pulse, 1.5f * pulse);
+            SetTouchScale(glm::vec2(1.5f * pulse, 1.5f * pulse));
+        }
+    }
+    
+    SetRectangleCorners();
+}
+
+[[nodiscard]] bool WindAttack::IsOut() {
+    // The attack is considered "out" when it has reached its destination 
+    // and stayed for the designated duration
+    return m_HasReachedGoal && m_StayDuration <= 0;
+}
+
+[[nodiscard]] bool WindAttack::IsAlive() {
+    // The attack is always alive until it's out
+    return !IsOut() && GetPenetration() > 0;
 }

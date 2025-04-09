@@ -99,11 +99,11 @@ void App::Update() {
     }
     else if(!Win_Board -> GetVisible() && !Lose_Board -> GetVisible()) {
         // for ice monkey
-        for (auto& balloonPtr : m_Balloons) { //進入判斷之前，先確定氣球有沒有活着？ 死了，就去掉他的 debuff
-            if (!balloonPtr -> IsAlive()) {
-                balloonPtr -> ClearDebuff();
-            }
-        }
+        // for (auto& balloonPtr : m_Balloons) { //進入判斷之前，先確定氣球有沒有活着？ 死了，就去掉他的 debuff
+        //     if (!balloonPtr -> IsAlive() ) {
+        //         balloonPtr -> ClearDebuff();
+        //     }
+        // }
         for (auto& monkeyPtr : m_Monkeys) {
             int status;
             std::string monkeyType = abi::__cxa_demangle(typeid(*monkeyPtr).name(), 0, 0, &status);
@@ -356,9 +356,19 @@ void App::Update() {
                 // balloonPtr -> ClearDebuff(); // 清除氣球身上的debuff
                 std::vector<std::shared_ptr<Balloon>> bs = balloonPtr -> Burst();
                 new_balloons.insert(new_balloons.end(), bs.begin(), bs.end());
+                //連續凍結
                 if (balloonPtr -> ShowDebuff(10) > 0 && ( balloonPtr -> ShowDebuff(0) >0 || balloonPtr -> ShowDebuff(1) > 0)) {
                     for (auto& b : bs) {
                         b -> GetDebuff({{0,100}});
+                    }
+                }
+                if (balloonPtr -> ShowDebuff(11) > 0) {
+                    // LOG_DEBUG("11ha================");
+                    for (auto& b : bs) {
+                        b -> GetDebuff({{2,100}});
+                        b -> GetDebuff({{11, 100}});
+                        b -> GetDebuff({{12, balloonPtr -> ShowDebuff(12)}});
+                        b -> GetDebuff({{13, balloonPtr -> ShowDebuff(13)}});
                     }
                 }
                 remove_balloons.push_back(balloonPtr);

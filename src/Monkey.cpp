@@ -157,12 +157,16 @@ bool Monkey::Countdown() {
         return true;
     }
     m_Count += 1;
+    return otheratk();
+}
+bool Monkey::otheratk(){
     return false;
 }
 
 void Monkey::ResetCount(){
     m_Count = 0;
 }
+
 
 int Monkey::IsInformationBoardClicked(glm::vec2 mousePosition, int money) {
     std::vector<int> val = m_InformationBoard -> IsClick(mousePosition, money);
@@ -982,32 +986,93 @@ Airport::Airport(glm::vec2 position) : Monkey(position){
     UpdateRange();
     SetSize(glm::vec2(50.0f, 50.0f));
 }
+
 void Airport::UpdateLevel() {
     int level = GetLevel();
     int upgradePath = GetUpgradePath();
-    auto attributes = GetAttributes();
     if (upgradePath == 1) {
         switch (level) {
             case 1:
-                SetCd(100);
+                SetCd(GetCd()/2);
+                ResetCount();
+                break;
+            case 2:
+                GetAttributes() -> SetPenetration(GetAttributes() -> GetPenetration()*8);
+                break;
+            case 3:
+
+                break;
+            case 4:
                 break;
         }
-    }   
+    }else{
+        switch (level) {
+            case 1:
+                break;
+            case 2:
+                GetAttributes() -> AddProperty(2);
+                break;
+            case 3:
+                break;
+        }
+
+    }
 }
-
-
 
 std::vector<std::shared_ptr<Attack>> Airport::ProduceAttack(glm::vec2 goalPosition) {
     glm::vec2 position = GetPosition();
     std::vector<std::shared_ptr<Attack>> remove_attacks;
-    ResetCount();
+    
     std::vector<std::shared_ptr<Attack>> attacks;
-    for (auto& airplanePtr : m_Airplanes) {
-        glm::vec2 position = airplanePtr -> GetPosition();
-        for (int i=0; i < 8; i++) {
-            glm::vec2 rotated_position = ProduceCoordinateByAngle(position, 45*i);
-            std::shared_ptr<Attack> attack = std::make_shared<Dart>(position, rotated_position, GetAttributes());
-            attacks.push_back(attack);
+    int level = GetLevel();
+    int upgradePath = GetUpgradePath();
+    if (GetCount() == GetCd()) {
+        ResetCount();
+        if (upgradePath == 1 && level > 2) {
+            if (level == 4) {
+                attack_type = !attack_type;
+            }
+            if (attack_type) {
+                for (auto& airplanePtr : m_Airplanes) {
+                    glm::vec2 position = airplanePtr -> GetPosition();
+                    for (int i=0; i < 8; i++) {
+                        glm::vec2 rotated_position = ProduceCoordinateByAngle(position, 45*i);
+                        std::shared_ptr<Attack> attack = std::make_shared<Chasenormal>(position, rotated_position,goalPosition, GetAttributes());
+                        attacks.push_back(attack);
+                    }
+                }
+            }else{
+                for (auto& airplanePtr : m_Airplanes) {
+                    glm::vec2 position = airplanePtr -> GetPosition();
+                    std::shared_ptr<Attack> attack1 = std::make_shared<Bomb>(position, goalPosition, GetAttributes());
+                    attack1 -> SetImage(GA_RESOURCE_DIR"/Attack/Airplanebomb.png");
+                    attack1 -> SetPenetration(1);
+                    attacks.push_back(attack1);
+                    std::shared_ptr<Attack> attack2 = std::make_shared<Explosion>(position, goalPosition, attack1, GetAttributes());
+                    attack2 -> SetScale(glm::vec2(10, 10));
+                    attack2 -> SetTouchScale(glm::vec2(10, 10));
+                    attack2 -> SetVisible(false);
+                    attacks.push_back(attack2);
+                }
+            }
+        }else if (upgradePath == 2){
+            for (auto& airplanePtr : m_Airplanes) {
+                glm::vec2 position = airplanePtr -> GetPosition();
+                for (int i=0; i < 16; i++) {
+                    glm::vec2 rotated_position = ProduceCoordinateByAngle(position, 22.5*i);
+                    std::shared_ptr<Attack> attack = std::make_shared<Dart>(position, rotated_position, GetAttributes());
+                    attacks.push_back(attack);
+                }
+            }
+        } else{
+            for (auto& airplanePtr : m_Airplanes) {
+                glm::vec2 position = airplanePtr -> GetPosition();
+                for (int i=0; i < 8; i++) {
+                    glm::vec2 rotated_position = ProduceCoordinateByAngle(position, 45*i);
+                    std::shared_ptr<Attack> attack = std::make_shared<Dart>(position, rotated_position, GetAttributes());
+                    attacks.push_back(attack);
+                }
+            }
         }
     }
 
@@ -1020,6 +1085,27 @@ std::vector<std::shared_ptr<Attack>> Airport::ProduceAttack(glm::vec2 goalPositi
     }
 
     return attacks;
+}
+
+bool Airport::otheratk(){
+    int level = GetLevel();
+    int upgradePath = GetUpgradePath();
+    if (upgradePath == 2) {
+        switch (level) {
+            case 4:
+            case 3:
+            case 2:
+            case 1:
+                if (otheratk_cd[0] == 0) { 
+                    return true;
+                }
+                otheratk_cd[0] -= 1;
+                break;
+            case 0:
+                return false;
+        }
+    }
+    return false;
 }
 
 bool Airport::IsCollision(const std::shared_ptr<Balloon>& other) const{
@@ -1058,8 +1144,61 @@ BuccaneerMonkey::BuccaneerMonkey(glm::vec2 position) : Monkey(position){
     UpdateRange();
 }
 
+bool BuccaneerMonkey::otheratk(){
+    int level = GetLevel();
+    int upgradePath = GetUpgradePath();
+    if (upgradePath == 2) {
+        switch (level) {
+            case 3:
+                if (otheratk_cd[1] == 0) {
+                    return true;
+                }
+                otheratk_cd[1] -= 1;
+            case 1:
+                if (otheratk_cd[0] == 0) { 
+                    return true;
+                }
+                otheratk_cd[0] -= 1;
+        }
+    }
+    return false;
+}
+
+
 void BuccaneerMonkey::UpdateLevel(){
-    return ;
+    int level = GetLevel();
+    int upgradePath = GetUpgradePath();
+    auto attributes = GetAttributes();
+    if (upgradePath == 1) {
+        switch (level) {
+            case 1:
+                SetCd(GetCd()/2);
+                ResetCount();
+                break;
+            case 2:
+                SetRadius(GetRadius()*1.5);
+                UpdateRange();
+                break;
+            case 3:
+                SetCd(GetCd()/2);
+                ResetCount();
+                break;
+            case 4:
+                break;
+        }
+    }else if (upgradePath == 2){
+        switch (level) {
+            case 1:
+                break;
+            case 2:
+                attributes -> AddProperty(2);
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+        }   
+    }
 }
 
 bool BuccaneerMonkey::Placeable(std::vector<std::vector<std::vector<glm::vec2>>> Level_Placeable){
@@ -1078,25 +1217,90 @@ bool BuccaneerMonkey::Placeable(std::vector<std::vector<std::vector<glm::vec2>>>
         }
         
         if (IsMonkeyInRectangle(topLeft, bottomRight)) {
-            LOG_DEBUG("碰到了: {}, {}", topLeft, bottomRight);
             return true;
         }
-        LOG_DEBUG("沒碰到:{}, {}", topLeft, bottomRight);
     }
     // 如果猴子不在任何一个矩形区域内，返回true
     return false;
 }
 
+glm::vec2 BuccaneerMonkey::ProduceCoordinateByAngle(glm::vec2 position, float angle) {
+    double radian = angle * PI / 180.0;
+    glm::vec2 rotated;
+    glm::vec2 rotated_position;
+    rotated.x = position.x * cos(radian) - position.y * sin(radian);
+    rotated.y = position.x * sin(radian) + position.y * cos(radian);
+    rotated_position.x = position.x + rotated.x;
+    rotated_position.y = position.y + rotated.y;
+    return rotated_position;
+}
+
 std::vector<std::shared_ptr<Attack>> BuccaneerMonkey::ProduceAttack(glm::vec2 goalPosition) {
-    std::vector<std::shared_ptr<Attack>> remove_attacks;
-    ResetCount();
     SetRotation(goalPosition);
     std::vector<std::shared_ptr<Attack>> attacks;
-    std::shared_ptr<Attack> attack1 = std::make_shared<Bomb>(GetPosition(), goalPosition, GetAttributes());
-    attacks.push_back(attack1);
-    std::shared_ptr<Attack> attack2 = std::make_shared<Explosion>(GetPosition(), goalPosition, attack1, GetAttributes());
-    attack2 -> SetVisible(false);
-    attacks.push_back(attack2);
+    if (GetCount() == GetCd()) {
+        ResetCount();
+
+        std::shared_ptr<Attack> attack1 = std::make_shared<Bomb>(GetPosition(), goalPosition, GetAttributes());
+        attacks.push_back(attack1);
+        std::shared_ptr<Attack> attack2 = std::make_shared<Explosion>(GetPosition(), goalPosition, attack1, GetAttributes());
+        attack2 -> SetVisible(false);
+        attacks.push_back(attack2);
+    }
+    int level = GetLevel();
+    int upgradePath = GetUpgradePath();
+    if (upgradePath == 1) {
+        switch (level) {
+            // make plane
+            case 4: {
+                glm::vec2 position = GetPosition();
+                std::vector<std::shared_ptr<Attack>> remove_attacks;
+                for (auto& airplanePtr : m_Airplanes) {
+                    glm::vec2 airplanePosition = airplanePtr->GetPosition();
+                    for (int i = 0; i < 8; i++) {
+                        glm::vec2 rotated_position = ProduceCoordinateByAngle(airplanePosition, 45*i);
+                        std::shared_ptr<Attack> attack = std::make_shared<Dart>(airplanePosition, rotated_position, GetAttributes());
+                        attacks.push_back(attack);
+                    }
+                }
+
+                if (m_Airplanes.size() < airplane_num) {
+                    glm::vec2 rotated_position = ProduceCoordinateByAngle(position, 0);
+                    std::shared_ptr<Attack> attack = std::make_shared<Airplane>(position, rotated_position, GetAttributes());
+                    m_Airplanes.push_back(attack);
+                    AddAttackChild(attack);
+                    attacks.push_back(attack);
+                }
+                break;
+            }
+        }
+    } else if (upgradePath == 2) {
+        switch (level) {
+            case 3:{
+                if (otheratk_cd[1] == 0) {
+                    otheratk_cd[1] = 50;
+                    std::shared_ptr<Attack> attack1 = std::make_shared<Bomb>(GetPosition(), goalPosition, GetAttributes());
+                    attacks.push_back(attack1);
+                    std::shared_ptr<Attack> attack2 = std::make_shared<Explosion>(GetPosition(), goalPosition, attack1, GetAttributes());
+                    attack2 -> SetVisible(false);
+                    attacks.push_back(attack2); 
+                }
+            }
+            case 1:
+            {
+                if (otheratk_cd[0] == 0) {
+                    otheratk_cd[0] = 100;
+                    auto grap = std::make_shared<Dart>(GetPosition(), goalPosition, GetAttributes());
+                    grap -> SetImage(GA_RESOURCE_DIR"/Attack/grap.png");
+                    grap -> SetHeight(64);
+                    grap -> SetWidth(42);
+                    grap -> SetPenetration(4);
+                    attacks.push_back(grap);
+                }
+                break;
+            }
+        }
+    }
     return attacks;
 }
 
@@ -1267,7 +1471,78 @@ std::vector<std::shared_ptr<Attack>> RubberMonkey::ProduceAttack(glm::vec2 goalP
 
     std::shared_ptr<Attack> attack = std::make_shared<Rubber>(GetPosition(), goalPosition, GetAttributes());
     attacks.push_back(attack);
+    int level = GetLevel();
+    int upgradePath = GetUpgradePath();
+    if (upgradePath == 1) {
+        switch (level) {
+            case 4:
+                // 創建爆炸效果並關聯到Rubber攻擊
+                std::shared_ptr<Attack> attack2 = std::make_shared<Explosion>(GetPosition(), goalPosition, attack, GetAttributes());
+                attack2 -> SetVisible(false); // 初始不可見，等Rubber命中時才顯示
+                // attack2 -> SetImage(GA_RESOURCE_DIR"/Attack/Rubber.png");
+                attacks.push_back(attack2);
+                break;
+        }
+    }else if (upgradePath == 2){
+        switch (level) {
+            case 2:{
+                // 創建扇形攻擊（左右各15度的兩發，加上中間一發，共三發）
+                double angles[] = {-30, -15, 15, 30}; // 扇形角度，可調整
+                
+                for (double angle : angles) {
+                    double radians = angle * PI / 180.0;  // 角度轉為弧度
+                    double cosA = cos(radians);
+                    double sinA = sin(radians);
+                    glm::vec2 center = m_Transform.translation;
+                    
+                    // 旋轉目標點以獲得新的方向
+                    double x = center.x + (goalPosition.x - center.x) * cosA - (goalPosition.y - center.y) * sinA;
+                    double y = center.y + (goalPosition.x - center.x) * sinA + (goalPosition.y - center.y) * cosA;
+                    
+                    // 創建額外的Rubber攻擊
+                    std::shared_ptr<Attack> extraAttack = std::make_shared<Rubber>(
+                        GetPosition(), 
+                        glm::vec2(x, y), 
+                        GetAttributes()
+                    );
+                    attacks.push_back(extraAttack);
+                }
+            }
+        }
+    }
     return attacks;
+}
+
+void RubberMonkey::UpdateLevel(){
+    int level = GetLevel();
+    int upgradePath = GetUpgradePath();
+    auto attributes = GetAttributes();
+    if (upgradePath == 1) {
+        switch (level) {
+            case 1:
+                attributes -> AddDebuff({11, 300});
+                break;
+            case 2:
+                attributes -> AddDebuff({12, 300});
+                break;
+            case 3:
+                attributes -> AddDebuff({13, 300});
+                break;
+            case 4:
+                attributes -> AddDebuff({12, 300});
+                break;
+        }
+    }else if (upgradePath == 2){
+        switch (level) {
+            case 1:
+                attributes -> AddDebuff({2, 100});
+                break;
+            case 3:
+                SetCd(30);
+                break;
+                
+        }
+    }
 }
 
 //########################################################################
@@ -1293,10 +1568,153 @@ MagicMonkey::MagicMonkey(glm::vec2 position) : Monkey(position){
 
 std::vector<std::shared_ptr<Attack>> MagicMonkey::ProduceAttack(glm::vec2 goalPosition) {
     SetRotation(goalPosition);
-    ResetCount();
     std::vector<std::shared_ptr<Attack>> attacks;
-
-    std::shared_ptr<Attack> attack = std::make_shared<MagicBall>(GetPosition(), goalPosition, GetAttributes());
-    attacks.push_back(attack);
+    int level = GetLevel();
+    int upgradePath = GetUpgradePath();
+    if (GetCount() == GetCd()) { // basic attack
+        ResetCount();
+        if (upgradePath == 1 && level > 0) {
+            std::shared_ptr<Attack> attack = std::make_shared<MagicBall>(GetPosition(), goalPosition, GetAttributes());
+            attack -> SetScale(glm::vec2(10, 10));
+            attack -> SetTouchScale(glm::vec2(10, 10));
+            attacks.push_back(attack);
+        }
+        else{
+            std::shared_ptr<Attack> attack = std::make_shared<MagicBall>(GetPosition(), goalPosition, GetAttributes());
+            attacks.push_back(attack);
+        }
+    }
+    if (upgradePath == 1){
+        if (level > 1){
+            if (otheratk_cd[0] == 0) { // 0 for light
+                otheratk_cd[0] = 150;
+                std::shared_ptr<Attack> attack = std::make_shared<MagicBall>(GetPosition(), goalPosition, GetAttributes());
+                attack -> SetImage(GA_RESOURCE_DIR"/Attack/light.png");
+                attacks.push_back(attack);
+                std::shared_ptr<Attack> attack2 = std::make_shared<lightExplosion>(attack);
+                attacks.push_back(attack2); 
+            }
+        }
+        if (level > 2){
+            if (otheratk_cd[1] == 0) { // 1 for wind
+                otheratk_cd[1] = 150;
+                std::shared_ptr<Attack> attack = std::make_shared<WindAttack>(GetPosition(), goalPosition, GetAttributes());
+                attack -> SetPower(0);
+                attack -> SetSpeed(20);
+                attack -> SetPenetration(30);
+                if (level > 3){
+                    attack -> SetSpeed(40);
+                    attack -> SetPower(1);
+                    attack -> SetPenetration(100);
+                }
+                attacks.push_back(attack);
+            }
+        }
+    }
+    if (upgradePath == 2){
+        if (level > 0){
+            if (otheratk_cd[0] == 0) { // 0 for fireball
+                otheratk_cd[0] = 120;
+                std::shared_ptr<Attack> attack = std::make_shared<Dart>(GetPosition(), goalPosition, GetAttributes());
+                attack -> SetPenetration(30);
+                attack -> SetImage(GA_RESOURCE_DIR"/Attack/fireball.png");
+                attack -> SetHeight(50);
+                attack -> SetWidth(100);
+                attack -> SetSpeed(20);
+                attacks.push_back(attack);
+            }
+        }
+        if (level > 2){
+            if (otheratk_cd[1] == 0) { // 1 for fireball
+                otheratk_cd[1] = 20;
+                // 創建扇形攻擊（左右各15度的兩發，加上中間一發，共三發）
+                double angles[] = {-40, -30, -20, -10, 0, 10, 20, 30, 40}; // 扇形角度，每10度間隔，射出九發
+                    
+                for (double angle : angles) {
+                    double radians = angle * PI / 180.0;  // 角度轉為弧度
+                    double cosA = cos(radians);
+                    double sinA = sin(radians);
+                    glm::vec2 center = m_Transform.translation;
+                    
+                    // 旋轉目標點以獲得新的方向
+                    double x = center.x + (goalPosition.x - center.x) * cosA - (goalPosition.y - center.y) * sinA;
+                    double y = center.y + (goalPosition.x - center.x) * sinA + (goalPosition.y - center.y) * cosA;
+                    
+                    // 創建額外的Rubber攻擊
+                    std::shared_ptr<Attack> extraAttack = std::make_shared<Dart>(
+                        GetPosition(), 
+                        glm::vec2(x, y), 
+                        GetAttributes()
+                    );
+                    extraAttack -> SetHeight(80);
+                    extraAttack -> SetWidth(80);
+                    extraAttack -> SetSpeed(40);
+                    extraAttack -> SetPenetration(1);
+                    extraAttack -> SetImage(GA_RESOURCE_DIR"/Attack/dragonfire.png");
+                    attacks.push_back(extraAttack);
+                }
+            }
+        }
+    }
+    //left area is for extra attack
+    
     return attacks;
+}
+
+bool MagicMonkey::otheratk(){
+    int level = GetLevel();
+    int upgradePath = GetUpgradePath();
+    if (upgradePath == 1 ){
+        if (level > 1){
+            if (otheratk_cd[0] == 0) { // 0 for light
+                return true;
+            }
+            otheratk_cd[0]--;
+        }
+        if (level > 2){
+            if (otheratk_cd[1] == 0) { // 1 for wind
+                return true;
+            }
+            otheratk_cd[1]--;
+        }
+    }
+    if (upgradePath == 2){
+        if (level > 0){
+            if (otheratk_cd[0] == 0) { // 0 for fireball
+                return true;
+            }
+            otheratk_cd[0]--;
+        }
+        if (level > 2){
+            if (otheratk_cd[1] == 0) { // 1 for fireball
+                return true;
+            }
+            otheratk_cd[1]--;
+        }
+    }
+    return false;
+}
+
+
+void MagicMonkey::UpdateLevel(){
+    int level = GetLevel();
+    int upgradePath = GetUpgradePath();
+    auto attributes = GetAttributes();
+    if (upgradePath == 1) {
+        switch (level) {
+            case 1:
+                attributes -> SetPenetration(7);
+                attributes -> SetPower(attributes -> GetPower()*1.5);
+                break;
+            case 2:
+                // attributes -> SetPenetration(2);
+                break;
+        }
+    }else{
+        switch (level) {
+            case 2:
+                attributes -> AddProperty(2);
+                break;
+        }
+    }
 }

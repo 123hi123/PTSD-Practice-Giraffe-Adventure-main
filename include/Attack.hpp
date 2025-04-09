@@ -396,3 +396,57 @@ private:
     std::shared_ptr<Attack> m_Bomb; 
     int existTime = 3;
 };
+
+class Chasenormal : public Attack {
+public:
+    explicit Chasenormal(glm::vec2 position, glm::vec2 goal_position, glm::vec2 chase_position, std::shared_ptr<Attributes> attributes);
+    void Move() override;
+    bool IsOut() override;
+private:
+    int time = 0;
+    glm::vec2 m_ChasePosition;
+};
+
+class BombPiapple : public Attack {
+public:
+    explicit BombPiapple(glm::vec2 position);
+    [[nodiscard]] bool IsOut() override;
+    [[nodiscard]] bool IsAlive() override;
+private:
+    int time = 180;
+};
+class Explosionnew : public Attack {
+public:
+    explicit Explosionnew(std::shared_ptr<Attack> bomb);
+    void Move() override;
+    [[nodiscard]] bool IsOut() override;
+    [[nodiscard]] bool IsAlive() override;
+private:
+    std::shared_ptr<Attack> m_Bomb;
+    int existTime = 3;
+};
+
+class lightExplosion : public Attack {
+public:
+    explicit lightExplosion(std::shared_ptr<Attack> bomb);
+    void Move() override;
+    [[nodiscard]] bool IsOut() override;
+    [[nodiscard]] bool IsAlive() override;
+private:
+    std::shared_ptr<Attack> m_Bomb;
+    int existTime = 5;
+};
+
+
+// New WindAttack class
+class WindAttack : public Attack {
+public:
+    explicit WindAttack(glm::vec2 position, glm::vec2 goal_position, std::shared_ptr<Attributes> attributes);
+    void Move() override;
+    [[nodiscard]] bool IsOut() override;
+    [[nodiscard]] bool IsAlive() override;
+private:
+    glm::vec2 m_GoalPosition;
+    bool m_HasReachedGoal = false;
+    int m_StayDuration = 100;
+};
