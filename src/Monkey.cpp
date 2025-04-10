@@ -1055,7 +1055,7 @@ std::vector<std::shared_ptr<Attack>> Airport::ProduceAttack(glm::vec2 goalPositi
                     attacks.push_back(attack2);
                 }
             }
-        }else if (upgradePath == 2){
+        }else if (upgradePath == 2 && level >2){
             for (auto& airplanePtr : m_Airplanes) {
                 glm::vec2 position = airplanePtr -> GetPosition();
                 for (int i=0; i < 16; i++) {
@@ -1072,6 +1072,20 @@ std::vector<std::shared_ptr<Attack>> Airport::ProduceAttack(glm::vec2 goalPositi
                     std::shared_ptr<Attack> attack = std::make_shared<Dart>(position, rotated_position, GetAttributes());
                     attacks.push_back(attack);
                 }
+            }
+        }
+    }
+    if (upgradePath == 2){
+        if (level>0 && otheratk_cd[0] == 0){
+            otheratk_cd[0] = 180;
+            for (auto& airplanePtr : m_Airplanes) {
+                glm::vec2 position = airplanePtr -> GetPosition();
+                std::shared_ptr<Attack> attack = std::make_shared<BombPiapple>(position);
+                attack -> SetScale(glm::vec2(0.05, 0.05));
+                std::shared_ptr<Attack> attack2 = std::make_shared<Explosionnew>(attack);
+                attack2 -> SetVisible(false);
+                attacks.push_back(attack);
+                attacks.push_back(attack2);
             }
         }
     }
