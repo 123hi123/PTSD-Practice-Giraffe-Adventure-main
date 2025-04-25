@@ -6,24 +6,10 @@
 第一層是不可以放置的 陸地 (所以水的部分要關掉)
 第二是水路允許 (只要框水路的部分)
 
-
-# recode
-
-fin
-- ice
-- ninja
-- dart
-- nail
-- canon
-- 迴力鏢
-- 狙擊
-- 上漆
-- 海盜
-- airplan
-- magic
-unfin
-- super
+# notice
+include\PhaseResourceManger.hpp 這裡有點地圖的對應
+生氣球 
 
 
 
-
+![image-20250425200831571](https://cdn.jsdelivr.net/gh/321hi123/typoraimgbed/img/image-20250425200831571.png)

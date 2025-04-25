@@ -27,6 +27,47 @@ void App::ValidTask(int next_room) {
             SetLevel(2);
             AddBoard();
             break;
+        case 3:
+            m_Phase = Phase::THIRD_LEVEL;
+            SetLevel(3);
+            AddBoard();
+            break;
+        case 4:
+            m_Phase = Phase::FOURTH_LEVEL;
+            SetLevel(4);
+            AddBoard();
+            break;
+        case 5:
+            m_Phase = Phase::FIFTH_LEVEL;
+            SetLevel(5);
+            AddBoard();
+            break;
+        case 6:
+            m_Phase = Phase::SIXTH_LEVEL;
+            SetLevel(6);
+            AddBoard();
+            break;
+        case 7:
+            m_Phase = Phase::SEVENTH_LEVEL;
+            SetLevel(7);
+            AddBoard();
+            break;
+        case 8:
+            m_Phase = Phase::EIGHTH_LEVEL;
+            SetLevel(8);
+            AddBoard();
+            break;
+        case 9:
+            m_Phase = Phase::NINTH_LEVEL;
+            SetLevel(9);
+            AddBoard();
+            break;
+        case 10:
+            m_Phase = Phase::TENTH_LEVEL;
+            SetLevel(10);
+            AddBoard();
+            break;
+            
     }
 }
 
@@ -112,7 +153,7 @@ void App::SetLevel(int level) {
     Level_Balloons = m_PRM -> GetBalloons(level-1);
     Level_Placeable = m_PRM -> GetPlaceable(level-1);
 
-    m_Counters.push_back(std::make_shared<Heart>(1, 20));
+    m_Counters.push_back(std::make_shared<Heart>(20, 20));
     m_Root.AddChild(m_Counters[0]);
     m_Root.AddChild(m_Counters[0]->GetCounterText());
 

@@ -26,6 +26,14 @@ public:
         LOBBY,
         FIRST_LEVEL,
         SECOND_LEVEL,
+        THIRD_LEVEL,
+        FOURTH_LEVEL,
+        FIFTH_LEVEL,
+        SIXTH_LEVEL,
+        SEVENTH_LEVEL,
+        EIGHTH_LEVEL,
+        NINTH_LEVEL,
+        TENTH_LEVEL,
     };
 
     State GetCurrentState() const { return m_CurrentState; }
@@ -45,7 +53,7 @@ private:
 
     State m_CurrentState = State::START;
     Phase m_Phase = Phase::LOBBY;
-    std::vector<glm::vec2> Level_Coordinates;
+    std::vector<std::vector<glm::vec2>> Level_Coordinates;
     std::vector<std::vector<int>> Level_Balloons;
     std::vector<std::vector<std::vector<glm::vec2>>> Level_Placeable;
     Util::Renderer m_Root;
