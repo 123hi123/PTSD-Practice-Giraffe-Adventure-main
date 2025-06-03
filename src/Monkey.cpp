@@ -802,6 +802,10 @@ std::vector<std::shared_ptr<Attack>> NinjaMonkey::ProduceAttack(glm::vec2 goalPo
         std::shared_ptr<Attack> attack = std::make_shared<NinjaShuriken>(GetPosition(), goalPosition, GetAttributes());
         attacks.push_back(attack);
     }
+    else {
+        std::shared_ptr<Attack> attack = std::make_shared<Shuriken>(GetPosition(), goalPosition, GetAttributes());
+        attacks.push_back(attack);
+    }
     if (upgradePath ==2 && level==3){
 
         //have posiblity to produce attack 

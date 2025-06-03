@@ -12,6 +12,7 @@ int count = 20;
 bool blocked = false;
 int block_time = 0;
 int nuclear_bomb_time = 0;
+int balloons_round = 0;
 std::vector<std::pair<std::shared_ptr<Balloon>, std::shared_ptr<Rope_tail>>> grabbedBalloons; // 存儲所有正在被拉動的氣球
 std::vector<std::shared_ptr<Balloon>> icetogethers;
 std::vector<std::shared_ptr<Balloon>> icebursts;
@@ -95,7 +96,7 @@ int current_room(App::Phase phase) {
         case App::Phase::TENTH_LEVEL:
             return 10;
         default:
-            return 0;
+            return 11;
          
     }
 }
@@ -103,9 +104,6 @@ int current_room(App::Phase phase) {
 void App::Update() {
     LOG_TRACE("Update");
 
-    
-    
-    
     if (m_Phase == Phase::LOBBY) {
         // Opstate 
         // 按W鍵增加金錢    
@@ -113,6 +111,7 @@ void App::Update() {
             for (int i = 0; i < IsLevelUnlock.size(); i++) {
                 IsLevelUnlock[i] = true;
             }
+            ValidTask(0);
         }
         // opstate end
         glm::vec2 position = Util::Input::GetCursorPosition ();
@@ -122,9 +121,11 @@ void App::Update() {
             if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB)) {
                 if (Lobby_Buttons[0] -> IsClicked(position)) {
                     Choose_Level_Board -> UpdateVisible(true);
+                    mode = 0;
                 }
                 if (Lobby_Buttons[1] -> IsClicked(position)) {
-                    ValidTask(2);
+                    Choose_Level_Board -> UpdateVisible(true);
+                    mode = 10;
                 }
             }
         }
@@ -133,7 +134,8 @@ void App::Update() {
             if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB)) {
                 int isClick = Choose_Level_Board -> IsClicked(position);
                 if (isClick >= 0 && IsLevelUnlock[isClick]) {
-                    ValidTask(isClick+1);
+                    level = isClick+1;
+                    ValidTask(isClick+1+mode);
                 }
             }
         }
@@ -141,7 +143,7 @@ void App::Update() {
             m_CurrentState = State::END;
         }
     }
-    else if(!Win_Board -> GetVisible() && !Lose_Board -> GetVisible()) {
+    else if(!Win_Board -> GetVisible() && !Lose_Board -> GetVisible() && !Suspend_Board -> GetVisible()) {
         // for ice monkey
         // for (auto& balloonPtr : m_Balloons) { //進入判斷之前，先確定氣球有沒有活着？ 死了，就去掉他的 debuff
         //     if (!balloonPtr -> IsAlive() ) {
@@ -150,6 +152,25 @@ void App::Update() {
         // }
         // Opstate 
     // 按W鍵增加金錢
+
+        glm::vec2 position = Util::Input::GetCursorPosition ();
+        Suspend_Button -> IsTouch(position);
+        Accelerate_Button -> IsTouch(position);
+        if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB)){
+            if (Suspend_Button -> IsClicked(position)) {
+                Suspend_Board -> UpdateVisible(true);
+            }
+
+            else if (Accelerate_Button -> IsClicked(position)) {
+                if (GetFPS() == 180) {
+                    SetFPS(60);
+                }
+                else {
+                    SetFPS(180);
+                }
+            }
+        }
+
         if (Util::Input::IsKeyPressed(Util::Keycode::W)) {
             m_Counters[1]->AddValue(90000); // 每次按W增加1000金錢
             LOG_DEBUG("按W鍵增加1000金錢");
@@ -161,10 +182,10 @@ void App::Update() {
             if (monkeyType == "IceMonkey") {
                 if (monkeyPtr->GetLevel() >= 4 && monkeyPtr->GetUpgradePath() == 1) {
                     for (auto& balloonPtr : m_Balloons) {
-                        if (monkeyPtr->IsCollision(balloonPtr) && !std::any_of(icetogethers.begin(), icetogethers.end(), 
-                            [balloonPtr](const std::shared_ptr<Balloon>& ptr) { 
+                        if (monkeyPtr->IsCollision(balloonPtr) && !std::any_of(icetogethers.begin(), icetogethers.end(),
+                            [balloonPtr](const std::shared_ptr<Balloon>& ptr) {
                             return ptr == balloonPtr; // 比較是否為同一個氣球
-                        })) 
+                        }))
                         {
                             auto attack1 = std::make_shared<Icetogether>(balloonPtr);
                             m_Attacks.push_back(attack1);
@@ -176,14 +197,14 @@ void App::Update() {
                 else if (monkeyPtr->GetLevel() >= 3 && monkeyPtr->GetUpgradePath() == 2 ) {
 
                     for (auto& balloonPtr : m_Balloons) {
-                        if (monkeyPtr->IsCollision(balloonPtr) && !std::any_of(icebursts.begin(), icebursts.end(), 
-                            [balloonPtr](const std::shared_ptr<Balloon>& ptr) { 
+                        if (monkeyPtr->IsCollision(balloonPtr) && !std::any_of(icebursts.begin(), icebursts.end(),
+                            [balloonPtr](const std::shared_ptr<Balloon>& ptr) {
                             return ptr == balloonPtr; // 比較是否為同一個氣球
-                        })) 
+                        }))
                         {
                             int num_fragments = rand() % 3 + 1; // 隨機產生3到6個碎片
                             float angle_step = 360.0f / num_fragments; // 均分360度
-                            
+
                             for (int i = 0; i < num_fragments; i++) {
                                 float current_angle = i * angle_step; // 計算當前碎片的角度
                                 auto attack1 = std::make_shared<Iceburstsliced>(
@@ -359,20 +380,38 @@ void App::Update() {
             }
         }
         // cd -= 1;
-
-        if (m_Phase != Phase::LOBBY && count == 0) {
+        if (m_Phase == Phase::InfiniteMode && count == 0) {
             int round = m_Counters[2] -> GetCurrent()-1;
-            if (m_Balloons.empty() && Level_Balloons[round].empty()) {
+            if (m_Balloons.empty() && balloons_round == (round+1)*2) {
                 m_Counters[2] -> AddValue(1);
+                balloons_round = 0;
             }
-            std::shared_ptr<Balloon> m_Balloon;
-            if (!Level_Balloons[round].empty() && !blocked) {
-                int num = Level_Balloons[round][0];
-                Level_Balloons[round].erase(Level_Balloons[round].begin());
+            int balloon_level = std::min(16, round/5);
+            if (balloons_round < (round+1)*2) {
+                int num = random_number(balloon_level+1);
+                std::shared_ptr<Balloon> m_Balloon;
                 m_Balloon = factory(num, Level_Coordinates);
                 m_Balloons.push_back(m_Balloon);
                 m_Root.AddChildren(m_Balloon -> GetDebuffViews());
                 m_Root.AddChild(m_Balloon);
+                balloons_round ++;
+            }
+        }
+        else{
+            if (m_Phase != Phase::LOBBY && count == 0) {
+                int round = m_Counters[2] -> GetCurrent()-1;
+                if (m_Balloons.empty() && Level_Balloons[round].empty()) {
+                    m_Counters[2] -> AddValue(1);
+                }
+                std::shared_ptr<Balloon> m_Balloon;
+                if (!Level_Balloons[round].empty() && !blocked) {
+                    int num = Level_Balloons[round][0];
+                    Level_Balloons[round].erase(Level_Balloons[round].begin());
+                    m_Balloon = factory(num, Level_Coordinates);
+                    m_Balloons.push_back(m_Balloon);
+                    m_Root.AddChildren(m_Balloon -> GetDebuffViews());
+                    m_Root.AddChild(m_Balloon);
+                }
             }
         }
 
@@ -819,6 +858,9 @@ void App::Update() {
         else if (Lose_Board -> GetVisible()) {
             Lose_Board -> IsTouch(position);
         }
+        else if (Suspend_Board -> GetVisible()) {
+            Suspend_Board -> IsTouch(position);
+        }
         if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB)) {
             bool isClick;
             if (Win_Board -> GetVisible()) {
@@ -826,8 +868,9 @@ void App::Update() {
                 if (isClick >= 0) {
                     switch (isClick) {
                         case 0:
-                            if (m_Phase != App::Phase::TENTH_LEVEL) {
+                            if (current_room(m_Phase) != 10) {
                                 ValidTask(current_room(m_Phase)+1);
+                                break;
                             }
                             ValidTask(0);
                             break;
@@ -842,11 +885,30 @@ void App::Update() {
                 if (isClick >= 0) {
                     switch (isClick) {
                         case 0:
-                            ValidTask(current_room(m_Phase));
+                            if (current_room(m_Phase) <= 10) {
+                                ValidTask(current_room(m_Phase)+mode);
+                            }
+                            else {
+                                ValidTask(level + mode);
+                            }
                             break;
                         case 1:
                             ValidTask(0);
                             break;
+                    }
+                }
+            }
+            else if (Suspend_Board -> GetVisible()) {
+                isClick = Suspend_Board -> IsClicked(position);
+                if (isClick >= 0) {
+                    switch (isClick) {
+                        case 0:
+                            Suspend_Board -> UpdateVisible(false);
+                        break;
+                        case 1:
+                            balloons_round = 0;
+                            ValidTask(0);
+                        break;
                     }
                 }
             }

@@ -34,6 +34,7 @@ public:
         EIGHTH_LEVEL,
         NINTH_LEVEL,
         TENTH_LEVEL,
+        InfiniteMode,
     };
 
     State GetCurrentState() const { return m_CurrentState; }
@@ -44,11 +45,14 @@ public:
 
     void End(); // NOLINT(readability-convert-member-functions-to-static)
 
+    int GetFPS() {return m_FPS;}
+
 private:
     void ValidTask(int next_room);
     void Reset();
     void SetLevel(int level);
     void AddBoard();
+    void SetFPS(int fps) {m_FPS = fps;};
 
 
     State m_CurrentState = State::START;
@@ -68,9 +72,15 @@ private:
     std::shared_ptr<Monkey> m_ClickedMonkey;
     std::shared_ptr<Board> Win_Board;
     std::shared_ptr<Board> Lose_Board;
+    std::shared_ptr<Board> Suspend_Board;
+    std::shared_ptr<Button> Suspend_Button;
+    std::shared_ptr<Button> Accelerate_Button;
     std::vector<std::shared_ptr<Button>> Lobby_Buttons;
     std::shared_ptr<Board> Choose_Level_Board;
     std::vector<bool> IsLevelUnlock = {true, false, false, false, false, false, false, false, false, false};
+    int mode = 0;
+    int m_FPS = 180;
+    int level = 0;
     
 
     bool m_EnterDown = false;
