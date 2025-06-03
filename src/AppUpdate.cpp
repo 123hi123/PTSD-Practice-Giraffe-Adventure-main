@@ -104,6 +104,9 @@ int current_room(App::Phase phase) {
 void App::Update() {
     LOG_TRACE("Update");
 
+    // 統一獲取鼠標位置，避免重複調用
+    const glm::vec2 mousePosition = Util::Input::GetCursorPosition();
+
     if (m_Phase == Phase::LOBBY) {
         // Opstate 
         // 按W鍵增加金錢    
@@ -114,25 +117,24 @@ void App::Update() {
             ValidTask(0);
         }
         // opstate end
-        glm::vec2 position = Util::Input::GetCursorPosition ();
         if (!Choose_Level_Board -> GetVisible()) {
-            Lobby_Buttons[0] -> IsTouch(position);
-            Lobby_Buttons[1] -> IsTouch(position);
+            Lobby_Buttons[0] -> IsTouch(mousePosition);
+            Lobby_Buttons[1] -> IsTouch(mousePosition);
             if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB)) {
-                if (Lobby_Buttons[0] -> IsClicked(position)) {
+                if (Lobby_Buttons[0] -> IsClicked(mousePosition)) {
                     Choose_Level_Board -> UpdateVisible(true);
                     mode = 0;
                 }
-                if (Lobby_Buttons[1] -> IsClicked(position)) {
+                if (Lobby_Buttons[1] -> IsClicked(mousePosition)) {
                     Choose_Level_Board -> UpdateVisible(true);
                     mode = 10;
                 }
             }
         }
         else {
-            Choose_Level_Board -> IsTouch(position);
+            Choose_Level_Board -> IsTouch(mousePosition);
             if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB)) {
-                int isClick = Choose_Level_Board -> IsClicked(position);
+                int isClick = Choose_Level_Board -> IsClicked(mousePosition);
                 if (isClick >= 0 && IsLevelUnlock[isClick]) {
                     level = isClick+1;
                     ValidTask(isClick+1+mode);
@@ -153,15 +155,14 @@ void App::Update() {
         // Opstate 
     // 按W鍵增加金錢
 
-        glm::vec2 position = Util::Input::GetCursorPosition ();
-        Suspend_Button -> IsTouch(position);
-        Accelerate_Button -> IsTouch(position);
+        Suspend_Button -> IsTouch(mousePosition);
+        Accelerate_Button -> IsTouch(mousePosition);
         if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB)){
-            if (Suspend_Button -> IsClicked(position)) {
+            if (Suspend_Button -> IsClicked(mousePosition)) {
                 Suspend_Board -> UpdateVisible(true);
             }
 
-            else if (Accelerate_Button -> IsClicked(position)) {
+            else if (Accelerate_Button -> IsClicked(mousePosition)) {
                 if (GetFPS() == 180) {
                     SetFPS(60);
                 }
@@ -291,9 +292,7 @@ void App::Update() {
         // skill countdown area end
 
         if (Util::Input::IsKeyPressed(Util::Keycode::MOUSE_LB) && m_Phase != Phase::LOBBY){
-            glm::vec2 position = Util::Input::GetCursorPosition ();
-
-            LOG_DEBUG("Mouse position: " + std::to_string(position.x) + ", " + std::to_string(position.y));
+            LOG_DEBUG("Mouse position: " + std::to_string(mousePosition.x) + ", " + std::to_string(mousePosition.y));
         }
 
         // 更新所有拖拽按钮
@@ -302,7 +301,6 @@ void App::Update() {
             dragButtonPtr->UpdateButtonState(m_Counters[1]->GetCurrent());
         }
 
-        glm::vec2 mousePosition = Util::Input::GetCursorPosition();
         // 处理猴子的拖拽逻辑
         if (m_DragMonkey) {
             // 已经有猴子在拖拽中
@@ -544,15 +542,13 @@ void App::Update() {
         remove_attacks = {};
         // #################################################################################################
         if (m_ClickedMonkey) {
-            glm::vec2 position = Util::Input::GetCursorPosition ();
-            m_ClickedMonkey -> IsButtonTouch(position);
+            m_ClickedMonkey -> IsButtonTouch(mousePosition);
         }
 
         if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB)) {
-            glm::vec2 position = Util::Input::GetCursorPosition ();
             int clickInformationBoard = 0; //0:無, 1:有, 2:關閉, 3:賣掉, 4:使用技能, 其他:升級(多少錢回多少
             if (m_ClickedMonkey) {
-                clickInformationBoard = m_ClickedMonkey -> IsInformationBoardClicked(position, m_Counters[1] -> GetCurrent());
+                clickInformationBoard = m_ClickedMonkey -> IsInformationBoardClicked(mousePosition, m_Counters[1] -> GetCurrent());
                 if (clickInformationBoard == 2) {
                     m_ClickedMonkey -> UpdateAllObjectVisible(false);
                     m_ClickedMonkey = nullptr;
@@ -776,7 +772,7 @@ void App::Update() {
                         continue;
                     }
                     
-                    if (monkeyPtr -> IsClicked(position)) {
+                    if (monkeyPtr -> IsClicked(mousePosition)) {
                         m_ClickedMonkey = monkeyPtr;
                     }
                 }
@@ -851,20 +847,19 @@ void App::Update() {
 
     }
     else {
-        glm::vec2 position = Util::Input::GetCursorPosition ();
         if (Win_Board -> GetVisible()) {
-            Win_Board -> IsTouch(position);
+            Win_Board -> IsTouch(mousePosition);
         }
         else if (Lose_Board -> GetVisible()) {
-            Lose_Board -> IsTouch(position);
+            Lose_Board -> IsTouch(mousePosition);
         }
         else if (Suspend_Board -> GetVisible()) {
-            Suspend_Board -> IsTouch(position);
+            Suspend_Board -> IsTouch(mousePosition);
         }
         if (Util::Input::IsKeyDown(Util::Keycode::MOUSE_LB)) {
             bool isClick;
             if (Win_Board -> GetVisible()) {
-                isClick = Win_Board -> IsClicked(position);
+                isClick = Win_Board -> IsClicked(mousePosition);
                 if (isClick >= 0) {
                     switch (isClick) {
                         case 0:
@@ -881,7 +876,7 @@ void App::Update() {
                 }
             }
             else if (Lose_Board -> GetVisible()) {
-                isClick = Lose_Board -> IsClicked(position);
+                isClick = Lose_Board -> IsClicked(mousePosition);
                 if (isClick >= 0) {
                     switch (isClick) {
                         case 0:
@@ -899,7 +894,7 @@ void App::Update() {
                 }
             }
             else if (Suspend_Board -> GetVisible()) {
-                isClick = Suspend_Board -> IsClicked(position);
+                isClick = Suspend_Board -> IsClicked(mousePosition);
                 if (isClick >= 0) {
                     switch (isClick) {
                         case 0:
