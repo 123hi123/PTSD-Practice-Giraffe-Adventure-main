@@ -107,6 +107,14 @@ void App::Update() {
 
     // ==================== 大廳界面處理 ====================
     if (m_Phase == Phase::LOBBY) {
+        // ==================== 大廳作弊鍵區塊 ====================
+        if (Util::Input::IsKeyPressed(Util::Keycode::W)) {
+            for (int i = 0; i < IsLevelUnlock.size(); i++) {
+                IsLevelUnlock[i] = true;
+            }
+            ValidTask(0);
+        }
+        
         if (!Choose_Level_Board -> GetVisible()) {
             Lobby_Buttons[0] -> IsTouch(mousePosition);
             Lobby_Buttons[1] -> IsTouch(mousePosition);
