@@ -1,0 +1,21 @@
+# ninja log v6
+2	88	7630614930110410	ptsd-populate-prefix/src/ptsd-populate-stamp/ptsd-populate-mkdir	52d9c1d40730fe6c
+2	88	7630614930110410	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/ptsd-subbuild/ptsd-populate-prefix/src/ptsd-populate-stamp/ptsd-populate-mkdir	52d9c1d40730fe6c
+2336	2411	7630614953335646	ptsd-populate-prefix/src/ptsd-populate-stamp/ptsd-populate-update	d83ec108c688a2e7
+89	2336	7630614952600926	ptsd-populate-prefix/src/ptsd-populate-stamp/ptsd-populate-download	f3b05562aa965671
+89	2336	7630614952600926	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/ptsd-subbuild/ptsd-populate-prefix/src/ptsd-populate-stamp/ptsd-populate-download	f3b05562aa965671
+2336	2411	7630614953335646	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/ptsd-subbuild/ptsd-populate-prefix/src/ptsd-populate-stamp/ptsd-populate-update	d83ec108c688a2e7
+2412	2484	7630614954071805	ptsd-populate-prefix/src/ptsd-populate-stamp/ptsd-populate-patch	52976c06b3148de6
+2412	2484	7630614954071805	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/ptsd-subbuild/ptsd-populate-prefix/src/ptsd-populate-stamp/ptsd-populate-patch	52976c06b3148de6
+2484	2554	7630614954777068	ptsd-populate-prefix/src/ptsd-populate-stamp/ptsd-populate-configure	c65e67f7c58cfbd2
+2484	2554	7630614954777068	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/ptsd-subbuild/ptsd-populate-prefix/src/ptsd-populate-stamp/ptsd-populate-configure	c65e67f7c58cfbd2
+2555	2626	7630614955495866	ptsd-populate-prefix/src/ptsd-populate-stamp/ptsd-populate-build	2109626819020085
+2555	2626	7630614955495866	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/ptsd-subbuild/ptsd-populate-prefix/src/ptsd-populate-stamp/ptsd-populate-build	2109626819020085
+2626	2704	7630614956278541	ptsd-populate-prefix/src/ptsd-populate-stamp/ptsd-populate-install	c97499e859f7e760
+2626	2704	7630614956278541	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/ptsd-subbuild/ptsd-populate-prefix/src/ptsd-populate-stamp/ptsd-populate-install	c97499e859f7e760
+2704	2774	7630614956971638	ptsd-populate-prefix/src/ptsd-populate-stamp/ptsd-populate-test	a58b40dcf92991fd
+2704	2774	7630614956971638	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/ptsd-subbuild/ptsd-populate-prefix/src/ptsd-populate-stamp/ptsd-populate-test	a58b40dcf92991fd
+2774	2866	7630614957900743	CMakeFiles/ptsd-populate-complete	1120c6f6e28dc45f
+2774	2866	7630614957900743	ptsd-populate-prefix/src/ptsd-populate-stamp/ptsd-populate-done	1120c6f6e28dc45f
+2774	2866	7630614957900743	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/ptsd-subbuild/CMakeFiles/ptsd-populate-complete	1120c6f6e28dc45f
+2774	2866	7630614957900743	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/ptsd-subbuild/ptsd-populate-prefix/src/ptsd-populate-stamp/ptsd-populate-done	1120c6f6e28dc45f

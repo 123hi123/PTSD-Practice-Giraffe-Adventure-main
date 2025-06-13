@@ -1,0 +1,21 @@
+# ninja log v6
+2	74	7630615738461319	sdl2_image-populate-prefix/src/sdl2_image-populate-stamp/sdl2_image-populate-mkdir	57562a148560e82d
+4668	4743	7630615785145200	sdl2_image-populate-prefix/src/sdl2_image-populate-stamp/sdl2_image-populate-build	d0133aac0cd2619e
+2	74	7630615738461319	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/sdl2_image-subbuild/sdl2_image-populate-prefix/src/sdl2_image-populate-stamp/sdl2_image-populate-mkdir	57562a148560e82d
+74	4438	7630615782098815	sdl2_image-populate-prefix/src/sdl2_image-populate-stamp/sdl2_image-populate-download	891682716fb54c66
+74	4438	7630615782098815	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/sdl2_image-subbuild/sdl2_image-populate-prefix/src/sdl2_image-populate-stamp/sdl2_image-populate-download	891682716fb54c66
+4438	4508	7630615782791997	sdl2_image-populate-prefix/src/sdl2_image-populate-stamp/sdl2_image-populate-update	540c70abe047d59c
+4438	4508	7630615782791997	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/sdl2_image-subbuild/sdl2_image-populate-prefix/src/sdl2_image-populate-stamp/sdl2_image-populate-update	540c70abe047d59c
+4508	4581	7630615783524761	sdl2_image-populate-prefix/src/sdl2_image-populate-stamp/sdl2_image-populate-patch	335017dff0e9c4d3
+4508	4581	7630615783524761	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/sdl2_image-subbuild/sdl2_image-populate-prefix/src/sdl2_image-populate-stamp/sdl2_image-populate-patch	335017dff0e9c4d3
+4581	4668	7630615784390123	sdl2_image-populate-prefix/src/sdl2_image-populate-stamp/sdl2_image-populate-configure	eaafed4bf26e9c97
+4581	4668	7630615784390123	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/sdl2_image-subbuild/sdl2_image-populate-prefix/src/sdl2_image-populate-stamp/sdl2_image-populate-configure	eaafed4bf26e9c97
+4668	4743	7630615785145200	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/sdl2_image-subbuild/sdl2_image-populate-prefix/src/sdl2_image-populate-stamp/sdl2_image-populate-build	d0133aac0cd2619e
+4743	4817	7630615785875512	sdl2_image-populate-prefix/src/sdl2_image-populate-stamp/sdl2_image-populate-install	d09522bb411615a0
+4889	4986	7630615787565197	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/sdl2_image-subbuild/CMakeFiles/sdl2_image-populate-complete	1a2a0ad6f4fa5b2e
+4743	4817	7630615785875512	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/sdl2_image-subbuild/sdl2_image-populate-prefix/src/sdl2_image-populate-stamp/sdl2_image-populate-install	d09522bb411615a0
+4817	4889	7630615786607703	sdl2_image-populate-prefix/src/sdl2_image-populate-stamp/sdl2_image-populate-test	eeadb8553fdd479f
+4817	4889	7630615786607703	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/sdl2_image-subbuild/sdl2_image-populate-prefix/src/sdl2_image-populate-stamp/sdl2_image-populate-test	eeadb8553fdd479f
+4889	4986	7630615787565197	CMakeFiles/sdl2_image-populate-complete	1a2a0ad6f4fa5b2e
+4889	4986	7630615787565197	sdl2_image-populate-prefix/src/sdl2_image-populate-stamp/sdl2_image-populate-done	1a2a0ad6f4fa5b2e
+4889	4986	7630615787565197	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/sdl2_image-subbuild/sdl2_image-populate-prefix/src/sdl2_image-populate-stamp/sdl2_image-populate-done	1a2a0ad6f4fa5b2e

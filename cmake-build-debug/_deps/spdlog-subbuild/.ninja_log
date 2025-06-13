@@ -1,0 +1,21 @@
+# ninja log v6
+2	73	7630615897236913	spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-mkdir	a9d14e2657d4a6d1
+1403	1471	7630615911212027	spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-patch	ddac291730917512
+1471	1542	7630615911913401	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/spdlog-subbuild/spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-configure	b0befe73e15f0031
+2	73	7630615897236913	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/spdlog-subbuild/spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-mkdir	a9d14e2657d4a6d1
+1334	1403	7630615910535750	spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-update	1f53ced97406c781
+74	1333	7630615909813820	spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-download	453006d8c29b392f
+1334	1403	7630615910535750	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/spdlog-subbuild/spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-update	1f53ced97406c781
+74	1333	7630615909813820	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/spdlog-subbuild/spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-download	453006d8c29b392f
+1403	1471	7630615911212027	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/spdlog-subbuild/spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-patch	ddac291730917512
+1471	1542	7630615911913401	spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-configure	b0befe73e15f0031
+1542	1612	7630615912612055	spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-build	95ee3a6c11f8b1e9
+1542	1612	7630615912612055	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/spdlog-subbuild/spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-build	95ee3a6c11f8b1e9
+1680	1750	7630615913991760	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/spdlog-subbuild/spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-test	1618e51459f1364
+1612	1680	7630615913309033	spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-install	9ce8813fd8f026f6
+1612	1680	7630615913309033	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/spdlog-subbuild/spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-install	9ce8813fd8f026f6
+1680	1750	7630615913991760	spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-test	1618e51459f1364
+1750	1838	7630615914876790	spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-done	4345676776ea871e
+1750	1838	7630615914876790	CMakeFiles/spdlog-populate-complete	4345676776ea871e
+1750	1838	7630615914876790	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/spdlog-subbuild/CMakeFiles/spdlog-populate-complete	4345676776ea871e
+1750	1838	7630615914876790	C:/Users/joego/OneDrive/Desktop/PTSD-Practice-Giraffe-Adventure-main/cmake-build-debug/_deps/spdlog-subbuild/spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-done	4345676776ea871e
