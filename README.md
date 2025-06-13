@@ -1,3 +1,12 @@
+
+# to ta 
+整個倉庫拉下來
+然後刪除 
+.idea/
+cmake-build-debug/
+這兩個資料夾
+clion 直接編譯
+
 # bug possible
 - the ice monkey sometime cant 冰凍氣球
 
